@@ -93,9 +93,7 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         this.socket = socket;
         this.parser = RecordParser.newDelimited(PROTOCOL_DELIMITER, socket);
         this.parser.endHandler(v -> socket.close())
-            .exceptionHandler(t -> {
-                socket.close();
-            })
+            .exceptionHandler(t -> socket.close())
             .handler(this);
         this.service = service;
     }
