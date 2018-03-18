@@ -23,7 +23,6 @@
 
 
         <sonar.sources>src/main</sonar.sources>
-        <sonar.tests>src/test</sonar.tests>
 
         <sonar.junit.reportsPath>reports/java/surefire-reports</sonar.junit.reportsPath>
         <sonar.jacoco.reportPath>reports/java/jacoco.exec</sonar.jacoco.reportPath>
