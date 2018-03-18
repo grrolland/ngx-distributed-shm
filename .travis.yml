@@ -1,1 +1,17 @@
-language: java
+anguage: java
+sudo: false
+install: true
+
+jdk:
+  - oraclejdk8
+
+script:
+  - ./runSonarQubeAnalysis.sh
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - '$HOME/.sonar/cache'
+
+notifications:
+  email: false

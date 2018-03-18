@@ -8,9 +8,26 @@
     <artifactId>ngx-distributed-shm</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+
+    <url>https://github.com/grrolland/ngx-distributed-shm</url>
+
+    <scm>
+        <connection>scm:git:git@github.com:grrolland/ngx-distributed-shm.git</connection>
+        <developerConnection>scm:git:git@github.com:grrolland/ngx-distributed-shm.git</developerConnection>
+        <url>https://github.com/grrolland/ngx-distributed-shm</url>
+    </scm>
+
     <properties>
         <vertx.version>3.5.1</vertx.version>
         <hazelcast.version>3.9.3</hazelcast.version>
+
+
+        <sonar.sources>src/main</sonar.sources>
+        <sonar.tests>src/test</sonar.tests>
+
+        <sonar.junit.reportsPath>reports/java/surefire-reports</sonar.junit.reportsPath>
+        <sonar.jacoco.reportPath>reports/java/jacoco.exec</sonar.jacoco.reportPath>
+
     </properties>
 
 
