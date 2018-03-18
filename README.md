@@ -43,14 +43,100 @@ The semantic of the protocol is the same as the [lua.shared](https://github.com/
  
  ## Startup Options
  
- ***-Dngx-distributed-shm.port=<port>***
+ ***-Dngx-distributed-shm.port=port***
+ **default :** *4321* 
  
- Startup the storage and bind the protocol port on <port>. Notice that the storage bind only on the localhost address.
+ Startup the storage and bind the protocol port on <port>. 
  
  This command startup the storage on the port 40000 and the 127.0.0.1 address : 
  
- ```
+```
   java -Dngx-distributed-shm.port=40000 -jar ngx-distributed-shm.jar
-  ```
-  
+```
+ 
+ ***-Dngx-distributed-shm.bind_address=address***
+**default :** *127.0.0.1*
 
+Startup the storage and bind the protocol on address <address>.
+ 
+ This command startup the storage on the 192.168.0.1 address : 
+ 
+```
+  java -Dngx-distributed-shm.bind_address=192.168.0.1 -jar ngx-distributed-shm.jar
+```
+  
+## Protocol
+
+The protocol is a test protocol inspired by the memcached protocol.
+
+There is two part in the protocol request : the command line part and the optional data part.
+
+### Command line part
+
+The command line part has the following format :
+
+```
+COMMAND ARG1 ARG2 ARGN\r\n
+```
+
+### Data part
+
+The data part is a bytes stream wich the length is specified in the command part.
+
+For exemple the second argument of the SET command set the length of the data to send : 
+
+```
+SET key 0 4\r\n
+1234
+``` 
+
+This command set the key "key" at the value "1234"
+
+### Commands
+
+***GET \<key\>***
+**with data:** *no* 
+
+Get the value of the key in the storage. This operation is atomic.
+ 
+```
+GET key\r\n
+```
+
+***SET \<key\> \<expiration\> \<length\>***
+**with data:** *yes*
+
+Set a value of length \<length\> for the key \<key\> in the storage with the expiration time in second \<expiration\>. This operation is atomic.
+
+When \<expiration\> is 0, the key don't expire.
+ 
+```
+SET key 10 4\r\n
+1234
+```
+
+***TOUCH \<key\> \<expiration\>***
+**with data:** *no*
+
+Set the expiration time in second \<expiration\> for the key \<key\>. This operation is atomic.
+
+When \<expiration\> is 0, the key don't expire.
+ 
+```
+TOUCH key 10\r\n
+```
+
+***INCR \<key\> \<value\> \<init\>***
+**with data:** *no*
+
+Increment the value of the key \<key\> with \<value\> if the key exists and represent an integer.
+
+If the value is not an integer, this operation has no effect.
+
+If the key don't exsit or is expired, this operation create the key and init the value to  \<value\>+\<init\>.
+ 
+This operation is atomic.
+
+```
+INCR key -1 0\r\n
+```
