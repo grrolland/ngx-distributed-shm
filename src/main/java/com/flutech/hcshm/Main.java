@@ -41,17 +41,20 @@ public class Main {
 
         Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(40));
         DeploymentOptions options = new DeploymentOptions().setWorker(true);
-        vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), options, stringAsyncResult -> {
+        vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), options, stringAsyncResult ->
             Runtime.getRuntime().addShutdownHook(new Thread()
             {
+                /**
+                 * Shutdown Hook : stop hazelcast and vertx
+                 */
+                @Override
                 public void run()
                 {
                     instance.shutdown();
                     vertx.close();
                 }
-            });
-
-        });
+            })
+        );
 
     }
 }

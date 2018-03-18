@@ -51,9 +51,7 @@ public class ShmTcpServer extends AbstractVerticle {
 
         NetServerOptions options = new NetServerOptions().setPort(Configuration.getPort()).setHost(Configuration.getBindAddress());
         NetServer server = vertx.createNetServer(options);
-        server.connectHandler(sock -> {
-            ShmProtocolHandler.create(sock, service);
-        });
+        server.connectHandler(sock -> ShmProtocolHandler.create(sock, service));
         server.listen();
     }
 

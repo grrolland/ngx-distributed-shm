@@ -67,11 +67,6 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     private FrameMode expectedMode = FrameMode.COMMAND;
     /**
-     * Expected Data Frame Size
-     */
-    private int expectedDataSize   = 0;
-
-    /**
      * Current Key
      */
     private String key;
@@ -79,14 +74,6 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      * Current expiration value
      */
     private int expire;
-    /**
-     * Current incr value
-     */
-    private int incrValue;
-    /**
-     * Current incr init
-     */
-    private int incrInit;
 
     /**
      * Protocol Handler Instance Factory Method
@@ -107,7 +94,6 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         this.parser = RecordParser.newDelimited(PROTOCOL_DELIMITER, socket);
         this.parser.endHandler(v -> socket.close())
             .exceptionHandler(t -> {
-                t.printStackTrace();
                 socket.close();
             })
             .handler(this);
@@ -120,83 +106,129 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     @Override
     public void handle(Buffer buffer) {
-        switch(expectedMode) {
-            case COMMAND:
-                // get, set, touch, incr
+        try {
+            if (expectedMode == FrameMode.COMMAND) {
                 final String[] commandTokens = buffer.toString(PROTOCOL_ENCODING).split(COMMAND_LINE_DELIMITER);
-                try{
-                    final Command cmd = getCommand(commandTokens);
-                    switch(cmd) {
-                        case SET:
-                            // SET KEY EXPIRE SIZE
-                            assertTokens(commandTokens, 4);
-                            key = getKey(commandTokens[1]);
-                            expire = getExpire(commandTokens[2]);
-                            expectedMode = FrameMode.DATA;
-                            expectedDataSize = getSize(commandTokens[3]);
-                            parser.fixedSizeMode(expectedDataSize);
-                            break;
-                        case GET:
-                            // GET KEY
-                            assertTokens(commandTokens, 2);
-                            key = getKey(commandTokens[1]);
-                            expectedMode = FrameMode.COMMAND;
-                            socket.write(service.get(key), PROTOCOL_ENCODING);
-                            socket.write(DONE, PROTOCOL_ENCODING);
-                            parser.delimitedMode(PROTOCOL_DELIMITER);
-                            break;
-                        case TOUCH:
-                            // TOUCH KEY EXPIRE
-                            assertTokens(commandTokens, 3);
-                            key = getKey(commandTokens[1]);
-                            expire = getExpire(commandTokens[2]);
-                            expectedMode = FrameMode.COMMAND;
-                            service.touch(key, expire);
-                            socket.write(DONE, PROTOCOL_ENCODING);
-                            parser.delimitedMode(PROTOCOL_DELIMITER);
-                            break;
-                        case INCR:
-                            // INCR KEY INCRVALUE INITVALUE
-                            assertTokens(commandTokens, 4);
-                            key = getKey(commandTokens[1]);
-                            incrValue = getIncrValue(commandTokens[2]);
-                            incrInit = getIncrValue(commandTokens[3]);
-                            expectedMode = FrameMode.COMMAND;
-                            socket.write(service.incr(key, incrValue, incrInit), PROTOCOL_ENCODING);
-                            socket.write(DONE, PROTOCOL_ENCODING);
-                            parser.delimitedMode(PROTOCOL_DELIMITER);
-                            break;
-                    }
+                final Command cmd = getCommand(commandTokens);
+                switch (cmd) {
+                    case SET:
+                        doSetCommandPart(commandTokens);
+                        break;
+                    case GET:
+                        doGet(commandTokens);
+                        break;
+                    case TOUCH:
+                        doTouch(commandTokens);
+                        break;
+                    case INCR:
+                        doIncr(commandTokens);
+                        break;
                 }
-                catch (ProtocolException e)
-                {
-                    expectedMode = FrameMode.COMMAND;
-                    parser.delimitedMode(PROTOCOL_DELIMITER);
-                    socket.write(ERROR_MALFORMED_REQUEST, PROTOCOL_ENCODING);
-                    break;
-                }
-
-                break;
-            case DATA:
-
-                String data = buffer.toString(PROTOCOL_ENCODING);
-                String value;
-                try
-                {
-                    value = service.set(key, Long.valueOf(data), expire);
-                }
-                catch (NumberFormatException e)
-                {
-                    value = service.set(key, data, expire);
-                }
-
-                socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
-                socket.write(value, PROTOCOL_ENCODING);
-                socket.write(DONE, PROTOCOL_ENCODING);
-                expectedMode = FrameMode.COMMAND;
-                parser.delimitedMode(PROTOCOL_DELIMITER);
-                break;
+            }
+            else {
+                doSetDataPart(buffer);
+            }
+        } catch (ProtocolException e) {
+            expectedMode = FrameMode.COMMAND;
+            parser.delimitedMode(PROTOCOL_DELIMITER);
+            socket.write(ERROR_MALFORMED_REQUEST, PROTOCOL_ENCODING);
         }
+    }
+
+    /**
+     * Incrementation command :
+     *
+     * INCR KEY INCRVALUE INITVALUE
+     *
+     * @param commandTokens the command tokens
+     * @throws ProtocolException if malformed command
+     */
+    private void doIncr(String[] commandTokens) throws ProtocolException {
+        // INCR KEY INCRVALUE INITVALUE
+        assertTokens(commandTokens, 4);
+        key = getKey(commandTokens[1]);
+        expectedMode = FrameMode.COMMAND;
+        socket.write(service.incr(key, getIncrValue(commandTokens[2]), getIncrValue(commandTokens[3])), PROTOCOL_ENCODING);
+        socket.write(DONE, PROTOCOL_ENCODING);
+        parser.delimitedMode(PROTOCOL_DELIMITER);
+    }
+
+    /**
+     * Touch command :
+     *
+     * TOUCH KEY EXPIRE
+     *
+     * @param commandTokens the command tokens
+     * @throws ProtocolException if malformed command
+     */
+    private void doTouch(String[] commandTokens) throws ProtocolException {
+        assertTokens(commandTokens, 3);
+        key = getKey(commandTokens[1]);
+        expire = getExpire(commandTokens[2]);
+        expectedMode = FrameMode.COMMAND;
+        service.touch(key, expire);
+        socket.write(DONE, PROTOCOL_ENCODING);
+        parser.delimitedMode(PROTOCOL_DELIMITER);
+    }
+
+    /**
+     * Get command :
+     *
+     * GET KEY
+     *
+     * @param commandTokens the command tokens
+     * @throws ProtocolException if malformed command
+     */
+    private void doGet(String[] commandTokens) throws ProtocolException {
+        assertTokens(commandTokens, 2);
+        key = getKey(commandTokens[1]);
+        expectedMode = FrameMode.COMMAND;
+        socket.write(service.get(key), PROTOCOL_ENCODING);
+        socket.write(DONE, PROTOCOL_ENCODING);
+        parser.delimitedMode(PROTOCOL_DELIMITER);
+    }
+
+    /**
+     * Set command : command part
+     *
+     * SET KEY EXPIRE SIZE
+     * DATA
+     *
+     * @param commandTokens the command tokens
+     * @throws ProtocolException if malformed command
+     */
+    private void doSetCommandPart(String[] commandTokens) throws ProtocolException {
+        assertTokens(commandTokens, 4);
+        key = getKey(commandTokens[1]);
+        expire = getExpire(commandTokens[2]);
+        expectedMode = FrameMode.DATA;
+        parser.fixedSizeMode(getSize(commandTokens[3]));
+    }
+
+    /**
+     * Set command : data part
+     *
+     * SET KEY EXPIRE SIZE
+     * DATA
+     *
+     * @param buffer the data buffer
+     */
+    private void doSetDataPart(Buffer buffer) {
+        String data = buffer.toString(PROTOCOL_ENCODING);
+        String value;
+        try
+        {
+            value = service.set(key, Long.valueOf(data), expire);
+        }
+        catch (NumberFormatException e)
+        {
+            value = service.set(key, data, expire);
+        }
+        socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
+        socket.write(value, PROTOCOL_ENCODING);
+        socket.write(DONE, PROTOCOL_ENCODING);
+        expectedMode = FrameMode.COMMAND;
+        parser.delimitedMode(PROTOCOL_DELIMITER);
     }
 
 
@@ -234,7 +266,7 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      * @return the key
      * @throws ProtocolException if unable to get the key from command token
      */
-    private String getKey(String commandToken) throws ProtocolException {
+    private String getKey(String commandToken) {
         return commandToken;
     }
 
