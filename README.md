@@ -92,9 +92,37 @@ SET key 0 4\r\n
 
 This command set the key "key" at the value "1234"
 
+### Response
+
+The response protocol is fairly simple. When the the command is executed the response have the folowing format : 
+
+```
+\r\nRESPONSE response_arg\r\n
+```
+
+The following terms are used in the response :
+
+***DONE*** 
+
+The command is successfully executed. There is no argument.
+
+***ERROR*** 
+
+There is an error in the command. the argument is the error message.
+
+### Error Messages
+***malformed_request***
+
+The command request is malformed. There is an error in the request.
+ 
+***not_found***
+
+The key involved in the command is not found. 
+
 ### Commands
 
 ***GET \<key\>***
+
 **with data:** *no* 
 
 Get the value of the key in the storage. This operation is atomic.
@@ -104,6 +132,7 @@ GET key\r\n
 ```
 
 ***SET \<key\> \<expiration\> \<length\>***
+
 **with data:** *yes*
 
 Set a value of length \<length\> for the key \<key\> in the storage with the expiration time in second \<expiration\>. This operation is atomic.
@@ -116,6 +145,7 @@ SET key 10 4\r\n
 ```
 
 ***TOUCH \<key\> \<expiration\>***
+
 **with data:** *no*
 
 Set the expiration time in second \<expiration\> for the key \<key\>. This operation is atomic.
@@ -127,13 +157,14 @@ TOUCH key 10\r\n
 ```
 
 ***INCR \<key\> \<value\> \<init\>***
+
 **with data:** *no*
 
 Increment the value of the key \<key\> with \<value\> if the key exists and represent an integer.
 
 If the value is not an integer, this operation has no effect.
 
-If the key don't exsit or is expired, this operation create the key and init the value to  \<value\>+\<init\>.
+If the key don't exist or is expired, this operation create the key and init the value to  \<value\>+\<init\>.
  
 This operation is atomic.
 
