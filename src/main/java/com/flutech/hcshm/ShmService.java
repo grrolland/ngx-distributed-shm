@@ -26,7 +26,7 @@ public class ShmService implements Serializable {
             return r instanceof Long ? r.toString() : (String) r ;
         }
         else{
-            return "NOT FOUND";
+            return "ERROR not_found";
         }
     }
 

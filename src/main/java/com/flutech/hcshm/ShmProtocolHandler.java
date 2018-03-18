@@ -91,7 +91,7 @@ public class ShmProtocolHandler implements Handler<Buffer> {
                 {
                     expectedMode = FrameMode.COMMAND;
                     parser.delimitedMode("\r\n");
-                    socket.write("\r\nERROR\r\n", "UTF-8");
+                    socket.write("\r\nERROR malformed_request\r\n", "UTF-8");
                     break;
                 }
 

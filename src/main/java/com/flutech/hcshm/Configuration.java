@@ -14,5 +14,8 @@ public class Configuration {
 
     }
 
+    public static String getBindAddress() {
+        return System.getProperty("ngx-distributed-shm.bind_address", "127.0.0.1");
+    }
 
 }

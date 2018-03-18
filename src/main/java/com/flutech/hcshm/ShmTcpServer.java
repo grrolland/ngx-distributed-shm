@@ -21,7 +21,7 @@ public class ShmTcpServer extends AbstractVerticle {
     @Override
     public void start() throws Exception {
 
-        NetServerOptions options = new NetServerOptions().setPort(Configuration.getPort()).setHost("127.0.0.1");
+        NetServerOptions options = new NetServerOptions().setPort(Configuration.getPort()).setHost(Configuration.getBindAddress());
         NetServer server = vertx.createNetServer(options);
         server.connectHandler(sock -> {
             ShmProtocolHandler.create(sock, service);
