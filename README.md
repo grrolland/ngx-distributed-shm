@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/grrolland/lua-ngx-distributed-shm.svg?branch=master)](https://travis-ci.org/grrolland/lua-ngx-distributed-shm)
-
+[![Quality Gate](https://sonarqube.com/api/badges/gate?key=com.flutech:ngx-distributed-shm)](https://sonarqube.com/dashboard/index/com.flutech:ngx-distributed-shm)
+[![Technical debt ratio](https://sonarqube.com/api/badges/measure?key=com.flutech:ngx-distributed-shm&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard/index/com.flutech:ngx-distributed-shm)
 # ngx-distributed-shm
 
 This projet is memcached like server based on Hazelcast and Vertx. The goals of the project is to build an easy-to-use distributed memory storage with the nginx shared memory semantic for use with lua nginx plugin.
