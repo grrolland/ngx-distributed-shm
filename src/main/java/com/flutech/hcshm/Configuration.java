@@ -27,6 +27,15 @@ package com.flutech.hcshm;
 public class Configuration {
 
     /**
+     * Default Bind Port
+     */
+    public static final int DEFAULT_PORT = 4321;
+    /**
+     * Default Bind Address
+     */
+    public static final String DEFAULT_BIND_ADDRESS = "localhost";
+
+    /**
      * Private default constructor
      */
     private Configuration(){
@@ -39,11 +48,11 @@ public class Configuration {
     public static int getPort() {
         try
         {
-            return Integer.parseInt(System.getProperty("ngx-distributed-shm.port", "4321"));
+            return Integer.parseInt(System.getProperty("ngx-distributed-shm.port", Integer.toString(DEFAULT_PORT)));
         }
         catch (NumberFormatException e)
         {
-            return 4321;
+            return DEFAULT_PORT;
         }
     }
 
@@ -52,7 +61,7 @@ public class Configuration {
      * @return return th bind address (127.0.0.1 by default)
      */
     public static String getBindAddress() {
-        return System.getProperty("ngx-distributed-shm.bind_address", "127.0.0.1");
+        return System.getProperty("ngx-distributed-shm.bind_address", DEFAULT_BIND_ADDRESS);
     }
 
 }
