@@ -1,5 +1,19 @@
-/*
+/**
+ * ngx-distributed-shm
+ * Copyright (C) 2018  Flu.Tech
  *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package com.flutech.hcshm;
 
@@ -27,14 +41,13 @@ public class Main {
 
         Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(40));
         DeploymentOptions options = new DeploymentOptions().setWorker(true);
-        vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), stringAsyncResult -> {
+        vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), options, stringAsyncResult -> {
             Runtime.getRuntime().addShutdownHook(new Thread()
             {
                 public void run()
                 {
-                    System.out.println("Closing vertx...");
                     instance.shutdown();
-                    vertx.close(closeResult -> System.out.println("Done ."));
+                    vertx.close();
                 }
             });
 
