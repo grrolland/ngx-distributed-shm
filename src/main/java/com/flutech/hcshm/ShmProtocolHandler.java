@@ -118,6 +118,9 @@ public class ShmProtocolHandler implements Handler<Buffer> {
                     case TOUCH:
                         doTouch(commandTokens);
                         break;
+                    case QUIT:
+                        doQuit(commandTokens);
+                        break;
                     case INCR:
                         doIncr(commandTokens);
                         break;
@@ -146,7 +149,11 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         assertTokens(commandTokens, 4);
         key = getKey(commandTokens[1]);
         expectedMode = FrameMode.COMMAND;
-        socket.write(service.incr(key, getIncrValue(commandTokens[2]), getIncrValue(commandTokens[3])), PROTOCOL_ENCODING);
+        String value = service.incr(key, getIncrValue(commandTokens[2]), getIncrValue(commandTokens[3]));
+        socket.write("LEN ", PROTOCOL_ENCODING);
+        socket.write(Integer.toString(value.length()), PROTOCOL_ENCODING);
+        socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
+        socket.write(value, PROTOCOL_ENCODING);
         socket.write(DONE, PROTOCOL_ENCODING);
         parser.delimitedMode(PROTOCOL_DELIMITER);
     }
@@ -170,6 +177,20 @@ public class ShmProtocolHandler implements Handler<Buffer> {
     }
 
     /**
+     * Quit command :
+     *
+     * QUIT
+     *
+     * @param commandTokens the command tokens
+     * @throws ProtocolException if malformed command
+     */
+    private void doQuit(String[] commandTokens) throws ProtocolException {
+        assertTokens(commandTokens, 1);
+        socket.write(DONE, PROTOCOL_ENCODING);
+        socket.close();
+    }
+
+    /**
      * Get command :
      *
      * GET KEY
@@ -181,7 +202,11 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         assertTokens(commandTokens, 2);
         key = getKey(commandTokens[1]);
         expectedMode = FrameMode.COMMAND;
-        socket.write(service.get(key), PROTOCOL_ENCODING);
+        String value = service.get(key);
+        socket.write("LEN ", PROTOCOL_ENCODING);
+        socket.write(Integer.toString(value.length()), PROTOCOL_ENCODING);
+        socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
+        socket.write(value, PROTOCOL_ENCODING);
         socket.write(DONE, PROTOCOL_ENCODING);
         parser.delimitedMode(PROTOCOL_DELIMITER);
     }
@@ -352,7 +377,11 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         /**
          * The INCR command
          */
-        INCR
+        INCR,
+        /**
+         * The Quit Command
+         */
+        QUIT
     }
 
     /**
