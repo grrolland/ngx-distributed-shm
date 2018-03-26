@@ -23,6 +23,7 @@ import com.hazelcast.core.HazelcastInstance;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 /**
  * Main Class
@@ -39,7 +40,15 @@ public class Main {
         Config cfg = new Config();
         HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
 
-        Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(Configuration.getNbWorkers()));
+        final VertxOptions vertxOptions = new VertxOptions()
+                .setWorkerPoolSize(1)
+                .setMetricsOptions(
+                        new DropwizardMetricsOptions().
+                                setJmxEnabled(true).
+                                setJmxDomain("vertx-metrics")
+                );
+
+        Vertx vertx = Vertx.vertx(vertxOptions);
         DeploymentOptions options = new DeploymentOptions().setWorker(true);
         vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), options, stringAsyncResult ->
             Runtime.getRuntime().addShutdownHook(new Thread()
