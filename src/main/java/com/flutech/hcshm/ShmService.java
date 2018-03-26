@@ -37,7 +37,7 @@ public class ShmService {
     /**
      * The distributed Map storing keys and values
      */
-    private IMap<String, Object> shmMap;
+    private IMap<String, ShmValue> shmMap;
 
     /**
      * Public Constructor
@@ -54,9 +54,9 @@ public class ShmService {
      * @return the value as string or the error
      */
     public String get(String key) {
-        Object r = shmMap.get(key);
+        ShmValue r = shmMap.get(key);
         if (null != r) {
-            return r instanceof Long ? r.toString() : (String) r ;
+            return r.getValue() instanceof Long ? r.getValue().toString() : (String) r.getValue() ;
         }
         else{
             return "ERROR not_found";
@@ -71,7 +71,7 @@ public class ShmService {
      * @return the value set
      */
     public String set(String key, String value, int expire) {
-        shmMap.set(key, value, expire, TimeUnit.SECONDS);
+        shmMap.set(key, new ShmValue(value, expire), expire, TimeUnit.SECONDS);
         return value;
     }
 
@@ -84,7 +84,7 @@ public class ShmService {
      */
     public String set(String key, long value, int expire) {
         Long r =   Long.valueOf(value);
-        shmMap.set(key, value, expire, TimeUnit.SECONDS);
+        shmMap.set(key, new ShmValue(r, expire), expire, TimeUnit.SECONDS);
         return r.toString();
     }
 
@@ -95,7 +95,8 @@ public class ShmService {
      */
     public void touch(String key, int expire) {
         shmMap.lock(key);
-        final Object r = shmMap.get(key);
+        final ShmValue r = shmMap.get(key);
+        r.expire(expire);
         if (null != r) {
             shmMap.set(key, r, expire, TimeUnit.SECONDS);
         }
@@ -111,16 +112,24 @@ public class ShmService {
      */
     public String incr(String key, int value, int init) {
         shmMap.lock(key);
-        final Object r = shmMap.get(key);
+        final ShmValue r = shmMap.get(key);
         final Object newval;
+        int expire = 0;
         if (null != r) {
-            newval = r instanceof Long ? Long.valueOf( (Long) r + value) : r;
+            newval = r.getValue() instanceof Long ? Long.valueOf((Long) r.getValue() + value) : r.getValue();
+            expire = r.getLastingTime();
         }
         else
         {
             newval = Long.valueOf((long) value + (long) init);
         }
-        shmMap.set(key, newval);
+        if (expire >= 0) {
+            shmMap.set(key, new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
+        }
+        else
+        {
+            shmMap.remove(key);
+        }
         shmMap.unlock(key);
 
         return newval.toString();

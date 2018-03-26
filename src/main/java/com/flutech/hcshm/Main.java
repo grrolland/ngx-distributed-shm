@@ -39,7 +39,7 @@ public class Main {
         Config cfg = new Config();
         HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
 
-        Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(40));
+        Vertx vertx = Vertx.vertx(new VertxOptions().setWorkerPoolSize(Configuration.getNbWorkers()));
         DeploymentOptions options = new DeploymentOptions().setWorker(true);
         vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), options, stringAsyncResult ->
             Runtime.getRuntime().addShutdownHook(new Thread()

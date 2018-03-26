@@ -302,7 +302,11 @@ public class ShmProtocolHandler implements Handler<Buffer> {
     private int getExpire(String commandToken) throws ProtocolException {
         try
         {
-            return Integer.valueOf(commandToken);
+            final int expire =  Integer.valueOf(commandToken);
+            if (expire < 0) {
+                throw new ProtocolException();
+            }
+            return expire;
         }
         catch(NumberFormatException e)
         {
@@ -319,7 +323,11 @@ public class ShmProtocolHandler implements Handler<Buffer> {
     private int getSize(String commandToken) throws ProtocolException {
         try
         {
-            return Integer.valueOf(commandToken);
+            final int size = Integer.valueOf(commandToken);
+            if (size <= 0) {
+                throw new ProtocolException();
+            }
+            return size;
         }
         catch(NumberFormatException e)
         {

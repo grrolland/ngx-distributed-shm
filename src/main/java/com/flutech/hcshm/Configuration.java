@@ -25,7 +25,11 @@ package com.flutech.hcshm;
  * @author grrolland
  */
 public class Configuration {
+    /**
 
+     * Default Bind Port
+     */
+    public static final int DEFAULT_WORKERS = 40;
     /**
      * Default Bind Port
      */
@@ -53,6 +57,21 @@ public class Configuration {
         catch (NumberFormatException e)
         {
             return DEFAULT_PORT;
+        }
+    }
+
+    /**
+     * Get the nb workers of the server with the ngx-distributed-shm.workers system property
+     * @return the num workers (40 by default)
+     */
+    public static int getNbWorkers() {
+        try
+        {
+            return Integer.parseInt(System.getProperty("ngx-distributed-shm.workers", Integer.toString(DEFAULT_WORKERS)));
+        }
+        catch (NumberFormatException e)
+        {
+            return DEFAULT_WORKERS;
         }
     }
 
