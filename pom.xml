@@ -6,7 +6,7 @@
 
     <groupId>com.flutech</groupId>
     <artifactId>ngx-distributed-shm</artifactId>
-    <version>1.0.0-RC1</version>
+    <version>1.0.0-RC2</version>
 
 
     <url>https://github.com/grrolland/ngx-distributed-shm</url>
