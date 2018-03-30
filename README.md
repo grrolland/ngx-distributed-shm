@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/grrolland/lua-ngx-distributed-shm.svg?branch=master)](https://travis-ci.org/grrolland/lua-ngx-distributed-shm)
-[![Quality Gate](https://sonarqube.com/api/badges/gate?key=com.flutech:ngx-distributed-shm)](https://sonarqube.com/dashboard/index/com.flutech:ngx-distributed-shm)
+[![Build Status](https://travis-ci.org/grrolland/ngx-distributed-shm.svg?branch=master)](https://travis-ci.org/grrolland/ngx-distributed-shm)
+[![Quality Gate](https://sonarcloud.io/api/badges/gate?key=com.flutech:ngx-distributed-shm)](https://sonarcloud.io/dashboard/index/com.flutech:ngx-distributed-shm)
 [![Technical debt ratio](https://sonarqube.com/api/badges/measure?key=com.flutech:ngx-distributed-shm&metric=sqale_debt_ratio)](https://sonarqube.com/dashboard/index/com.flutech:ngx-distributed-shm)
 # ngx-distributed-shm
 
