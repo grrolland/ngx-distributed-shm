@@ -1,14 +1,11 @@
 
-local sub = string.sub
 local escape_uri = ngx.escape_uri
 local unescape_uri = ngx.unescape_uri
 local match = string.match
 local tcp = ngx.socket.tcp
 local strlen = string.len
-local concat = table.concat
 local setmetatable = setmetatable
-local type = type
-local error = error
+local ngx = ngx
 
 local _M = {
     _VERSION = '0.99'
@@ -86,7 +83,7 @@ function _M.get(self, key)
 
     ngx.log(ngx.DEBUG, "Data : ", data)
 
-    if line == "ERROR not_found" then
+    if data == "ERROR not_found" then
         return nil, "not found"
     end
 
@@ -99,6 +96,49 @@ function _M.get(self, key)
     end
 
     return data, nil
+end
+
+
+function _M.delete(self, key)
+
+    ngx.log(ngx.DEBUG, "Delete : ", key)
+
+    local sock = self.sock
+    if not sock then
+        return nil, "not initialized"
+    end
+
+    local bytes, err = sock:send("delete " .. self.escape_key(key) .. "\r\n" )
+    if not bytes then
+        return nil, err
+    end
+
+    local line, err = sock:receive()
+    if not line then
+        if err == "timeout" then
+            sock:close()
+        end
+        return nil, err
+    end
+
+    ngx.log(ngx.DEBUG, "Line 1 : ", line)
+
+
+    local line, err = sock:receive()
+    if not line then
+        if err == "timeout" then
+            sock:close()
+        end
+        return nil, err
+    end
+
+    ngx.log(ngx.DEBUG, "Line 2 : ", line)
+    if line == "DONE" then
+        return 1, nil
+    else
+        return nil, line
+    end
+
 end
 
 
@@ -164,11 +204,13 @@ end
 
 function _M.set(self, key, value, exptime)
 
-    ngx.log(ngx.DEBUG, "Key : ", key, ", Value : ", value, ", Exp : ", exptime)
-
-    if not exptime then
+    if not exptime or exptime == 0 then
         exptime = 0
+    else
+        exptime = math.floor(exptime + 0.5)
     end
+
+    ngx.log(ngx.DEBUG, "Key : ", key, ", Value : ", value, ", Exp : ", exptime)
 
     local sock = self.sock
     if not sock then
@@ -219,8 +261,18 @@ end
 
 
 function _M.touch(self, key, exptime)
+
+    if not exptime or exptime == 0 then
+        exptime = 0
+    else
+        exptime = math.floor(exptime + 0.5)
+    end
+
+    ngx.log(ngx.DEBUG, "Touch : ", key, ", Exp : ", exptime)
+
     local sock = self.sock
     if not sock then
+        ngx.log(ngx.DEBUG, "Socket not initialized")
         return nil, "not initialized"
     end
 
@@ -233,14 +285,18 @@ function _M.touch(self, key, exptime)
     local line, err = sock:receive()
     if not line then
         if err == "timeout" then
+            ngx.log(ngx.DEBUG, "Socket timeout")
             sock:close()
         end
         return nil, err
     end
 
+    ngx.log(ngx.DEBUG, "Line 1 : ", line)
+
     local line, err = sock:receive()
     if not line then
         if err == "timeout" then
+            ngx.log(ngx.DEBUG, "Socket timeout")
             sock:close()
         end
         return nil, err

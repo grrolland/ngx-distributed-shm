@@ -121,6 +121,9 @@ public class ShmProtocolHandler implements Handler<Buffer> {
                     case QUIT:
                         doQuit(commandTokens);
                         break;
+                    case DELETE:
+                        doDelete(commandTokens);
+                        break;
                     case INCR:
                         doIncr(commandTokens);
                         break;
@@ -207,6 +210,23 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         socket.write(Integer.toString(value.length()), PROTOCOL_ENCODING);
         socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
         socket.write(value, PROTOCOL_ENCODING);
+        socket.write(DONE, PROTOCOL_ENCODING);
+        parser.delimitedMode(PROTOCOL_DELIMITER);
+    }
+
+    /**
+     * Delete command :
+     *
+     * DELETE KEY
+     *
+     * @param commandTokens the command tokens
+     * @throws ProtocolException if malformed command
+     */
+    private void doDelete(String[] commandTokens) throws ProtocolException {
+        assertTokens(commandTokens, 2);
+        key = getKey(commandTokens[1]);
+        expectedMode = FrameMode.COMMAND;
+        service.delete(key);
         socket.write(DONE, PROTOCOL_ENCODING);
         parser.delimitedMode(PROTOCOL_DELIMITER);
     }
@@ -389,7 +409,11 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         /**
          * The Quit Command
          */
-        QUIT
+        QUIT,
+        /**
+         * The Delete Command
+         */
+        DELETE
     }
 
     /**

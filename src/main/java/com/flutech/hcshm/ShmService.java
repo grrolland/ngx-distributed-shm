@@ -135,4 +135,11 @@ public class ShmService {
         return newval.toString();
     }
 
+    /**
+     * The delete operation
+     * @param key the key to delete
+     */
+    public void delete(String key) {
+        shmMap.delete(key);
+    }
 }
