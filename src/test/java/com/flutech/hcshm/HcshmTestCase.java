@@ -48,11 +48,12 @@ public class HcshmTestCase {
      * Init the test case : launch the distributed memory
      */
     @BeforeClass
-    public static void init() {
+    public static void init() throws InterruptedException {
 
         System.setProperty("ngx-distributed-shm.bind_address", "0.0.0.0");
         System.setProperty("ngx-distributed-shm.port", "40321");
         Main.main(new String[] {});
+        Thread.sleep(10000);
 
     }
 
