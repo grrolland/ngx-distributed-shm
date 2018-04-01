@@ -85,7 +85,7 @@ public class ShmService {
     public String set(String key, long value, int expire) {
         String r =   Long.toString(value);
         shmMap.set(key, new ShmValue(r, expire), expire, TimeUnit.SECONDS);
-        return r.toString();
+        return r;
     }
 
     /**
@@ -140,7 +140,7 @@ public class ShmService {
         }
         shmMap.unlock(key);
 
-        return newval.toString();
+        return newval;
     }
 
     /**

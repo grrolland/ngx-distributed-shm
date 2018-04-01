@@ -6,7 +6,7 @@
 
     <groupId>com.flutech</groupId>
     <artifactId>ngx-distributed-shm</artifactId>
-    <version>1.0.0-RC2</version>
+    <version>1.0.0-RC3</version>
 
 
     <url>https://github.com/grrolland/ngx-distributed-shm</url>
@@ -75,12 +75,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility</artifactId>
-            <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
