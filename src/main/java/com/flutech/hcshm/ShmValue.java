@@ -25,12 +25,25 @@ import java.io.Serializable;
  */
 public class ShmValue implements Serializable {
 
+    /**
+     * The value
+     */
     private Object value = null;
-
+    /**
+     * The expiration deadline
+     */
     private long deadline = 0;
-
+    /**
+     * Indicate if the value expire
+     */
     private boolean doExpire = false;
 
+    /**
+     * Constructor
+     *
+     * @param newval the new value
+     * @param expire the expiration in second
+     */
     public ShmValue(Object newval, int expire) {
         value = newval;
         if (expire != 0) {
@@ -39,22 +52,18 @@ public class ShmValue implements Serializable {
         }
     }
 
+    /**
+     * Get the value
+     * @return the value
+     */
     public Object getValue() {
         return value;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public long getDeadline() {
-        return deadline;
-    }
-
-    public void setDeadline(long deadline) {
-        this.deadline = deadline;
-    }
-
+    /**
+     * Expire the value
+     * @param sectime expiration in second
+     */
     public void expire(int sectime) {
         if (sectime != 0) {
             deadline = System.currentTimeMillis() + sectime * 1000;
@@ -66,6 +75,15 @@ public class ShmValue implements Serializable {
         }
     }
 
+    /**
+     * Get le lasting time for the value
+     *
+     * When the time to the expiration deadline is lower than 1, return -1.
+     *
+     * tha mean the value should expire immediately
+     *
+     * @return the time to the expiration deadline
+     */
     public int getLastingTime() {
         if (doExpire) {
             final double lt = (deadline - System.currentTimeMillis()) / 1000d;

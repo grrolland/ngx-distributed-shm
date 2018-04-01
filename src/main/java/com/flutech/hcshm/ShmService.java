@@ -96,8 +96,8 @@ public class ShmService {
     public void touch(String key, int expire) {
         shmMap.lock(key);
         final ShmValue r = shmMap.get(key);
-        r.expire(expire);
         if (null != r) {
+            r.expire(expire);
             shmMap.set(key, r, expire, TimeUnit.SECONDS);
         }
         shmMap.unlock(key);
