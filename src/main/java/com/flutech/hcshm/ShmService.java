@@ -56,7 +56,7 @@ public class ShmService {
     public String get(String key) {
         ShmValue r = shmMap.get(key);
         if (null != r) {
-            return r.getValue() instanceof Long ? r.getValue().toString() : (String) r.getValue() ;
+            return r.getValue() ;
         }
         else{
             return "ERROR not_found";
@@ -83,7 +83,7 @@ public class ShmService {
      * @return the value set as string representation
      */
     public String set(String key, long value, int expire) {
-        Long r =   Long.valueOf(value);
+        String r =   Long.toString(value);
         shmMap.set(key, new ShmValue(r, expire), expire, TimeUnit.SECONDS);
         return r.toString();
     }
@@ -113,15 +113,23 @@ public class ShmService {
     public String incr(String key, int value, int init) {
         shmMap.lock(key);
         final ShmValue r = shmMap.get(key);
-        final Object newval;
+        String newval = null;
         int expire = 0;
         if (null != r) {
-            newval = r.getValue() instanceof Long ? Long.valueOf((Long) r.getValue() + value) : r.getValue();
+
+            try
+            {
+                newval = Long.toString(Long.parseLong(r.getValue()) + value);
+            }
+            catch (NumberFormatException e)
+            {
+                newval = r.getValue();
+            }
             expire = r.getLastingTime();
         }
         else
         {
-            newval = Long.valueOf((long) value + (long) init);
+            newval = Long.toString((long) value + (long) init);
         }
         if (expire >= 0) {
             shmMap.set(key, new ShmValue(newval, expire), expire, TimeUnit.SECONDS);

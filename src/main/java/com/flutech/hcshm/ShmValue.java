@@ -28,7 +28,7 @@ public class ShmValue implements Serializable {
     /**
      * The value
      */
-    private Object value = null;
+    private String value = null;
     /**
      * The expiration deadline
      */
@@ -44,7 +44,7 @@ public class ShmValue implements Serializable {
      * @param newval the new value
      * @param expire the expiration in second
      */
-    public ShmValue(Object newval, int expire) {
+    public ShmValue(String newval, int expire) {
         value = newval;
         if (expire != 0) {
             deadline = System.currentTimeMillis() + expire * 1000;
@@ -56,7 +56,7 @@ public class ShmValue implements Serializable {
      * Get the value
      * @return the value
      */
-    public Object getValue() {
+    public String getValue() {
         return value;
     }
 

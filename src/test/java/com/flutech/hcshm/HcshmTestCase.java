@@ -53,7 +53,7 @@ public class HcshmTestCase {
         System.setProperty("ngx-distributed-shm.bind_address", "0.0.0.0");
         System.setProperty("ngx-distributed-shm.port", "40321");
         Main.main(new String[] {});
-        Thread.sleep(10000);
+        Thread.sleep(10000); // NOSONAR
 
     }
 
@@ -229,6 +229,48 @@ public class HcshmTestCase {
     }
 
     /**
+     * Test Incrementation on string
+     */
+    @Test
+    public void testIncrOnString() {
+
+        try {
+            writer.write("SET key 0 10\r\n");
+            writer.write("AZERTYUIOP");
+            writer.flush();
+            String res = reader.readLine();
+            res = reader.readLine();
+            Assert.assertEquals("AZERTYUIOP", res);
+            res = reader.readLine();
+            Assert.assertEquals("DONE", res);
+
+            writer.write("INCR key 1 0\r\n");
+            writer.flush();
+            res = reader.readLine();
+            Assert.assertEquals("LEN 10", res);
+            res = reader.readLine();
+            Assert.assertEquals("AZERTYUIOP", res);
+            res = reader.readLine();
+            Assert.assertEquals("DONE", res);
+
+            writer.write("GET key\r\n");
+            writer.flush();
+            res = reader.readLine();
+            Assert.assertEquals("LEN 10", res);
+            res = reader.readLine();
+            Assert.assertEquals("AZERTYUIOP", res);
+            res = reader.readLine();
+            Assert.assertEquals("DONE", res);
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * Test incrementation with no set before
      */
     @Test
@@ -381,7 +423,7 @@ public class HcshmTestCase {
             res = reader.readLine();
             Assert.assertEquals("DONE", res);
 
-            Thread.sleep(2000);
+            Thread.sleep(2000); // NOSONAR
 
             writer.write("GET key\r\n");
             writer.flush();
@@ -420,7 +462,7 @@ public class HcshmTestCase {
             res = reader.readLine();
             Assert.assertEquals("DONE", res);
 
-            Thread.sleep(2000);
+            Thread.sleep(2000); // NOSONAR
 
             writer.write("GET key\r\n");
             writer.flush();
@@ -459,7 +501,7 @@ public class HcshmTestCase {
             res = reader.readLine();
             Assert.assertEquals("DONE", res);
 
-            Thread.sleep(2000);
+            Thread.sleep(2000); // NOSONAR
 
             writer.write("GET key\r\n");
             writer.flush();
