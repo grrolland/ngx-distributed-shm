@@ -32,7 +32,7 @@ public class Configuration {
     /**
      * Default Bind Address
      */
-    public static final String DEFAULT_BIND_ADDRESS = "localhost";
+    public static final String DEFAULT_BIND_ADDRESS = "127.0.0.1";
 
     /**
      * Private default constructor

@@ -60,7 +60,7 @@ public class HcshmTestCase {
     @Before
     public void before() {
         try {
-            Socket sock = new Socket(InetAddress.getByName("localhost"), 4321);
+            Socket sock = new Socket(InetAddress.getByName("127.0.0.1"), 4321);
             reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
         }
