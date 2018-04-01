@@ -51,7 +51,7 @@ public class HcshmTestCase {
     public static void init() {
 
         System.setProperty("ngx-distributed-shm.bind_address", "0.0.0.0");
-        System.setProperty("ngx-distributed-shm.port", "4321");
+        System.setProperty("ngx-distributed-shm.port", "40321");
         Main.main(new String[] {});
 
     }
@@ -62,7 +62,7 @@ public class HcshmTestCase {
     @Before
     public void before() {
         try {
-            Socket sock = new Socket(InetAddress.getByName("localhost"), 4321);
+            Socket sock = new Socket(InetAddress.getByName("localhost"), 40321);
             reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
         }

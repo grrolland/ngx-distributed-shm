@@ -38,7 +38,6 @@ public class Main {
         System.setProperty("vertx.disableFileCPResolving", "true");
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
         System.setProperty("hazelcast.logging.type", "slf4j");
-        System.setProperty("java.net.preferIPv4Stack", "true");
 
         Config cfg = new Config();
         HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
