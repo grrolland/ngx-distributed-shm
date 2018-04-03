@@ -43,12 +43,16 @@ public class Main {
         HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
 
         final VertxOptions vertxOptions = new VertxOptions()
-                .setWorkerPoolSize(1)
-                .setMetricsOptions(
-                        new DropwizardMetricsOptions().
-                                setJmxEnabled(true).
-                                setJmxDomain("vertx-metrics")
-                );
+                .setWorkerPoolSize(1);
+
+        if (Configuration.getEnableJMXCounter()) {
+            vertxOptions.setMetricsOptions(
+                    new DropwizardMetricsOptions().
+                            setJmxEnabled(true).
+                            setJmxDomain("vertx-metrics")
+            );
+
+        }
 
         Vertx vertx = Vertx.vertx(vertxOptions);
         DeploymentOptions options = new DeploymentOptions().setWorker(true);

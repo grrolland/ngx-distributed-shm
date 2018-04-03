@@ -17,6 +17,9 @@
  */
 package com.flutech.hcshm;
 
+import com.flutech.hcshm.commands.Command;
+import com.flutech.hcshm.commands.CommandFactory;
+import com.flutech.hcshm.commands.CommandVerb;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
@@ -28,19 +31,10 @@ import io.vertx.core.parsetools.RecordParser;
  * @author grrolland
  */
 public class ShmProtocolHandler implements Handler<Buffer> {
-
     /**
      * Protocol Encoding
      */
     public static final String PROTOCOL_ENCODING = "UTF-8";
-    /**
-     * Protocol response : DONE
-     */
-    public static final String DONE = "\r\nDONE\r\n";
-    /**
-     * Protocol response : Error malformed resuqest
-     */
-    public static final String ERROR_MALFORMED_REQUEST = "\r\nERROR malformed_request\r\n";
     /**
      * Protocol Command Delimiter
      */
@@ -49,7 +43,6 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      * Protocol Command Line Delimiter
      */
     public static final String COMMAND_LINE_DELIMITER = " ";
-
     /**
      * Vertx NetSocket
      */
@@ -59,6 +52,10 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     private ShmService service = null;
     /**
+     * Command Factory
+     */
+    private CommandFactory commandFactory = null;
+    /**
      * Vertx record Parser
      */
     private RecordParser parser = null;
@@ -67,13 +64,9 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     private FrameMode expectedMode = FrameMode.COMMAND;
     /**
-     * Current Key
+     * Current Command
      */
-    private String key;
-    /**
-     * Current expiration value
-     */
-    private int expire;
+    private Command currentCommand;
 
     /**
      * Protocol Handler Instance Factory Method
@@ -96,6 +89,8 @@ public class ShmProtocolHandler implements Handler<Buffer> {
             .exceptionHandler(t -> socket.close())
             .handler(this);
         this.service = service;
+        this.commandFactory = new CommandFactory();
+        this.commandFactory.setService(service);
     }
 
     /**
@@ -104,272 +99,37 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     @Override
     public void handle(Buffer buffer) {
-        try {
-            if (expectedMode == FrameMode.COMMAND) {
-                final String[] commandTokens = buffer.toString(PROTOCOL_ENCODING).split(COMMAND_LINE_DELIMITER);
-                final Command cmd = getCommand(commandTokens);
-                switch (cmd) {
-                    case SET:
-                        doSetCommandPart(commandTokens);
-                        break;
-                    case GET:
-                        doGet(commandTokens);
-                        break;
-                    case TOUCH:
-                        doTouch(commandTokens);
-                        break;
-                    case QUIT:
-                        doQuit(commandTokens);
-                        break;
-                    case DELETE:
-                        doDelete(commandTokens);
-                        break;
-                    case INCR:
-                        doIncr(commandTokens);
-                        break;
-                }
+
+        if (expectedMode == FrameMode.COMMAND) {
+
+            final String[] commandTokens = buffer.toString(PROTOCOL_ENCODING).split(COMMAND_LINE_DELIMITER);
+            currentCommand = commandFactory.get(commandTokens);
+            final String result = currentCommand.execute(commandTokens);
+
+            socket.write(result, PROTOCOL_ENCODING);
+
+            if (currentCommand.isTerminationCommand()) {
+                socket.close();
             }
-            else {
-                doSetDataPart(buffer);
+            else if (currentCommand.needsDataPart())
+            {
+                expectedMode = FrameMode.DATA;
+                parser.fixedSizeMode(currentCommand.getDataPartSize());
             }
-        } catch (ProtocolException e) {
+            else
+            {
+                expectedMode = FrameMode.COMMAND;
+                parser.delimitedMode(PROTOCOL_DELIMITER);
+            }
+
+        }
+        else {
+            final String result = currentCommand.executeDataPart(buffer.toString(PROTOCOL_ENCODING));
+            socket.write(result, PROTOCOL_ENCODING);
             expectedMode = FrameMode.COMMAND;
             parser.delimitedMode(PROTOCOL_DELIMITER);
-            socket.write(ERROR_MALFORMED_REQUEST, PROTOCOL_ENCODING);
         }
-    }
 
-    /**
-     * Incrementation command :
-     *
-     * INCR KEY INCRVALUE INITVALUE
-     *
-     * @param commandTokens the command tokens
-     * @throws ProtocolException if malformed command
-     */
-    private void doIncr(String[] commandTokens) throws ProtocolException {
-        // INCR KEY INCRVALUE INITVALUE
-        assertTokens(commandTokens, 4);
-        key = getKey(commandTokens[1]);
-        expectedMode = FrameMode.COMMAND;
-        String value = service.incr(key, getIncrValue(commandTokens[2]), getIncrValue(commandTokens[3]));
-        socket.write("LEN ", PROTOCOL_ENCODING);
-        socket.write(Integer.toString(value.length()), PROTOCOL_ENCODING);
-        socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
-        socket.write(value, PROTOCOL_ENCODING);
-        socket.write(DONE, PROTOCOL_ENCODING);
-        parser.delimitedMode(PROTOCOL_DELIMITER);
-    }
-
-    /**
-     * Touch command :
-     *
-     * TOUCH KEY EXPIRE
-     *
-     * @param commandTokens the command tokens
-     * @throws ProtocolException if malformed command
-     */
-    private void doTouch(String[] commandTokens) throws ProtocolException {
-        assertTokens(commandTokens, 3);
-        key = getKey(commandTokens[1]);
-        expire = getExpire(commandTokens[2]);
-        expectedMode = FrameMode.COMMAND;
-        service.touch(key, expire);
-        socket.write(DONE, PROTOCOL_ENCODING);
-        parser.delimitedMode(PROTOCOL_DELIMITER);
-    }
-
-    /**
-     * Quit command :
-     *
-     * QUIT
-     *
-     * @param commandTokens the command tokens
-     * @throws ProtocolException if malformed command
-     */
-    private void doQuit(String[] commandTokens) throws ProtocolException {
-        assertTokens(commandTokens, 1);
-        socket.write(DONE, PROTOCOL_ENCODING);
-        socket.close();
-    }
-
-    /**
-     * Get command :
-     *
-     * GET KEY
-     *
-     * @param commandTokens the command tokens
-     * @throws ProtocolException if malformed command
-     */
-    private void doGet(String[] commandTokens) throws ProtocolException {
-        assertTokens(commandTokens, 2);
-        key = getKey(commandTokens[1]);
-        expectedMode = FrameMode.COMMAND;
-        String value = service.get(key);
-        socket.write("LEN ", PROTOCOL_ENCODING);
-        socket.write(Integer.toString(value.length()), PROTOCOL_ENCODING);
-        socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
-        socket.write(value, PROTOCOL_ENCODING);
-        socket.write(DONE, PROTOCOL_ENCODING);
-        parser.delimitedMode(PROTOCOL_DELIMITER);
-    }
-
-    /**
-     * Delete command :
-     *
-     * DELETE KEY
-     *
-     * @param commandTokens the command tokens
-     * @throws ProtocolException if malformed command
-     */
-    private void doDelete(String[] commandTokens) throws ProtocolException {
-        assertTokens(commandTokens, 2);
-        key = getKey(commandTokens[1]);
-        expectedMode = FrameMode.COMMAND;
-        service.delete(key);
-        socket.write(DONE, PROTOCOL_ENCODING);
-        parser.delimitedMode(PROTOCOL_DELIMITER);
-    }
-
-    /**
-     * Set command : command part
-     *
-     * SET KEY EXPIRE SIZE
-     * DATA
-     *
-     * @param commandTokens the command tokens
-     * @throws ProtocolException if malformed command
-     */
-    private void doSetCommandPart(String[] commandTokens) throws ProtocolException {
-        assertTokens(commandTokens, 4);
-        key = getKey(commandTokens[1]);
-        expire = getExpire(commandTokens[2]);
-        expectedMode = FrameMode.DATA;
-        parser.fixedSizeMode(getSize(commandTokens[3]));
-    }
-
-    /**
-     * Set command : data part
-     *
-     * SET KEY EXPIRE SIZE
-     * DATA
-     *
-     * @param buffer the data buffer
-     */
-    private void doSetDataPart(Buffer buffer) {
-        String data = buffer.toString(PROTOCOL_ENCODING);
-        String value;
-        try
-        {
-            value = service.set(key, Long.valueOf(data), expire);
-        }
-        catch (NumberFormatException e)
-        {
-            value = service.set(key, data, expire);
-        }
-        socket.write(PROTOCOL_DELIMITER, PROTOCOL_ENCODING);
-        socket.write(value, PROTOCOL_ENCODING);
-        socket.write(DONE, PROTOCOL_ENCODING);
-        expectedMode = FrameMode.COMMAND;
-        parser.delimitedMode(PROTOCOL_DELIMITER);
-    }
-
-
-    /**
-     * Get Command from command token
-     * @param commandTokens the command tokens
-     * @return the command
-     * @throws ProtocolException if command is unknown
-     */
-    private Command getCommand(String[] commandTokens) throws ProtocolException {
-        try {
-            return Command.valueOf(commandTokens[0].toUpperCase());
-        }
-        catch (IllegalArgumentException e)
-        {
-            throw new ProtocolException();
-        }
-    }
-
-    /**
-     * Assert command tokens contains expected token number
-     * @param commandTokens the command tokens
-     * @param expectedTokens the expected token numbers
-     * @throws ProtocolException if the command token numbers is different from expected
-     */
-    private void assertTokens(String[] commandTokens, int expectedTokens) throws ProtocolException {
-        if(commandTokens.length != expectedTokens) {
-            throw  new ProtocolException();
-        }
-    }
-
-    /**
-     * Get the key form command token
-     * @param commandToken the command token
-     * @return the key
-     * @throws ProtocolException if unable to get the key from command token
-     */
-    private String getKey(String commandToken) {
-        return commandToken;
-    }
-
-    /**
-     * Get the expire value form command token
-     * @param commandToken the command token
-     * @return the expire value
-     * @throws ProtocolException if unable to get the expire value from command token
-     */
-    private int getExpire(String commandToken) throws ProtocolException {
-        try
-        {
-            final int l_expire =  Integer.parseInt(commandToken);
-            if (l_expire < 0) {
-                throw new ProtocolException();
-            }
-            return l_expire;
-        }
-        catch(NumberFormatException e)
-        {
-            throw new ProtocolException();
-        }
-    }
-
-    /**
-     * get the size of data from command token
-     * @param commandToken the command token
-     * @return the size of the data frame
-     * @throws ProtocolException if unable to get the size of the data frame from command token
-     */
-    private int getSize(String commandToken) throws ProtocolException {
-        try
-        {
-            final int size = Integer.parseInt(commandToken);
-            if (size <= 0) {
-                throw new ProtocolException();
-            }
-            return size;
-        }
-        catch(NumberFormatException e)
-        {
-            throw new ProtocolException();
-        }
-    }
-
-    /**
-     * get the incr value from command token
-     * @param commandToken the command token
-     * @return the incr value
-     * @throws ProtocolException if unable to get the incr value frame from command token
-     */
-    private int getIncrValue(String commandToken) throws ProtocolException {
-        try
-        {
-            return Integer.valueOf(commandToken);
-        }
-        catch(NumberFormatException e)
-        {
-            throw new ProtocolException();
-        }
     }
 
     /**
@@ -385,39 +145,4 @@ public class ShmProtocolHandler implements Handler<Buffer> {
          */
         DATA
     }
-
-    /**
-     * The known Command
-     */
-    private enum Command {
-        /**
-         * The GET command
-         */
-        GET,
-        /**
-         * The SET command
-         */
-        SET,
-        /**
-         * The TOUCH command
-         */
-        TOUCH,
-        /**
-         * The INCR command
-         */
-        INCR,
-        /**
-         * The Quit Command
-         */
-        QUIT,
-        /**
-         * The Delete Command
-         */
-        DELETE
-    }
-
-    /**
-     * The Protocol Exception
-     */
-    private class ProtocolException extends Exception {}
 }

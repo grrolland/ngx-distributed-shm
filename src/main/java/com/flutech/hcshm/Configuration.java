@@ -56,6 +56,14 @@ public class Configuration {
     }
 
     /**
+     * Get the bind port of the server with the ngx-distributed-shm.port system property
+     * @return the bind port (4321 by default)
+     */
+    public static boolean getEnableJMXCounter() {
+        return Boolean.parseBoolean(System.getProperty("ngx-distributed-shm.enable_jmx_counter", Boolean.toString(true)));
+    }
+
+    /**
      * Get the bind address with the ngx-distributed-shm.bind_address system property
      * @return return th bind address (127.0.0.1 by default)
      */

@@ -31,6 +31,7 @@ The semantic of the protocol is the same as the [lua.shared](https://github.com/
   - SET : set a value in the storage
   - GET : get a value from the storage
   - TOUCH : update the ttl of a key
+  - DELETE : delete a key from the sorage
   - INCR  : increment the value for a key
  
  In a clustered deployement (2 or more instances), a client need to connect to only one instance to see all the storage. The goal is to provide a near storage associated with an nginx instance.
@@ -153,9 +154,21 @@ SET key 10 4\r\n
 Set the expiration time in second \<expiration\> for the key \<key\>. This operation is atomic.
 
 When \<expiration\> is 0, the key don't expire.
- 
+When the key does not exist the command does nothing.
+
 ```
 TOUCH key 10\r\n
+```
+
+***DELETE \<key\>***
+
+**with data:** *no*
+
+Delete the key \<key\> from the storage. This operation is atomic.
+When the key does not exist the command does nothing.
+ 
+```
+DELETE key 10\r\n
 ```
 
 ***INCR \<key\> \<value\> \<init\>***

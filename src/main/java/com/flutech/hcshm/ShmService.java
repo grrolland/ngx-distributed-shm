@@ -59,7 +59,7 @@ public class ShmService {
             return r.getValue() ;
         }
         else{
-            return "ERROR not_found";
+            return null;
         }
     }
 
