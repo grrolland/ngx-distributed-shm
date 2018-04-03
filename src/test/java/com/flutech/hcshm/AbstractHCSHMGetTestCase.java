@@ -18,7 +18,10 @@
 package com.flutech.hcshm;
 
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.junit.*;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -53,6 +56,9 @@ public class AbstractHCSHMGetTestCase {
         System.setProperty("ngx-distributed-shm.bind_address", "0.0.0.0");
         System.setProperty("ngx-distributed-shm.port", "40321");
         System.setProperty("ngx-distributed-shm.enable_jmx_counter", "false");
+
+        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        root.setLevel(Level.INFO);
 
         Main.main(new String[] {});
         Thread.sleep(10000); // NOSONAR
