@@ -19,7 +19,6 @@ package com.flutech.hcshm;
 
 import com.flutech.hcshm.commands.Command;
 import com.flutech.hcshm.commands.CommandFactory;
-import com.flutech.hcshm.commands.CommandVerb;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
@@ -47,10 +46,6 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      * Vertx NetSocket
      */
     private NetSocket socket = null;
-    /**
-     * Shared Memory Service
-     */
-    private ShmService service = null;
     /**
      * Command Factory
      */
@@ -88,7 +83,6 @@ public class ShmProtocolHandler implements Handler<Buffer> {
         this.parser.endHandler(v -> socket.close())
             .exceptionHandler(t -> socket.close())
             .handler(this);
-        this.service = service;
         this.commandFactory = new CommandFactory();
         this.commandFactory.setService(service);
     }

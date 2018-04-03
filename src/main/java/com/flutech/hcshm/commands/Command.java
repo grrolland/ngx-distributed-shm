@@ -118,7 +118,7 @@ public abstract class Command {
      * @return the size of the data part if needed
      */
     public int getDataPartSize() {
-        return 0;
+        return 0; // NOSONAR
     }
 
     /**

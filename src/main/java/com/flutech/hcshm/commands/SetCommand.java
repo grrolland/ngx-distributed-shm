@@ -54,6 +54,7 @@ public class SetCommand extends Command {
      * Get if this command need a data part
      * @return true if this command need a data part
      */
+    @Override
     public boolean needsDataPart() {
         return needsDataPart;
     }
@@ -62,6 +63,7 @@ public class SetCommand extends Command {
      * Get the size of the data part if needed
      * @return the size of the data part if needed
      */
+    @Override
     public int getDataPartSize() {
         return length;
     }
@@ -95,6 +97,7 @@ public class SetCommand extends Command {
      * @return the result of the command 'protocol encoded'
      * @throws ProtocolException protocol exception
      */
+    @Override
     public String executeDataPart(String buffer) {
         final StringBuilder response = new StringBuilder();
         String value;

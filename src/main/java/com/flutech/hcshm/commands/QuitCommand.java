@@ -63,6 +63,7 @@ public class QuitCommand extends Command {
      * Get if this command is a termination command and the socket must be closed after the execution
      * @return true if this is a termination command
      */
+    @Override
     public boolean isTerminationCommand() {
         return isTermination;
     }
