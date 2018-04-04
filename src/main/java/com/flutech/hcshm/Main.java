@@ -39,8 +39,7 @@ public class Main {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
         System.setProperty("hazelcast.logging.type", "slf4j");
 
-        Config cfg = new Config();
-        HazelcastInstance instance = Hazelcast.newHazelcastInstance(cfg);
+        HazelcastInstance instance = Hazelcast.newHazelcastInstance(null);
 
         final VertxOptions vertxOptions = new VertxOptions()
                 .setWorkerPoolSize(1);
