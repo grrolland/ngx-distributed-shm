@@ -5,10 +5,13 @@ local match = string.match
 local tcp = ngx.socket.tcp
 local strlen = string.len
 local setmetatable = setmetatable
+local tonumber = tonumber
+local math = math
 local ngx = ngx
 
 local _M = {
-    _VERSION = '0.99'
+    _VERSION = '0.99',
+    PROTOCOL_ERROR = "protocol_error"
 }
 
 local mt = { __index = _M }
@@ -41,6 +44,59 @@ function _M.new(self, opts)
     }, mt)
 end
 
+local function read_response_line(self, data)
+    local sock = self.sock
+    if not sock then
+        return nil, "not initialized"
+    end
+    if not data then
+        local line, err = sock:receive()
+        if not line then
+            if err == "timeout" then
+                sock:close()
+            end
+            return nil, err
+        end
+        ngx.log(ngx.DEBUG, "RECEIVE : ", line)
+        local len = match(line, '^LEN (%d+)$')
+        if len then
+            ngx.log(ngx.DEBUG, "LEN : ", len)
+            return "LEN", tonumber(len)
+        end
+        local done = line == "DONE"
+        if done then
+            ngx.log(ngx.DEBUG, "DONE")
+            return "DONE", nil
+        end
+        local error = match(line, '^ERROR (%a+)$')
+        if error then
+            ngx.log(ngx.DEBUG, "ERROR", error)
+            return "ERROR", error
+        end
+        ngx.log(ngx.DEBUG, "PROTOCOL ERROR")
+        return nil, _M.PROTOCOL_ERROR
+    else
+        local data, err = sock:receive(data)
+        if not data then
+            if err == "timeout" then
+                sock:close()
+            end
+            return nil, err
+        end
+        ngx.log(ngx.DEBUG, "RECEIVE : ", data)
+        -- Discard trailing \r\n
+        local trail, err = sock:receive()
+        if not trail then
+            if err == "timeout" then
+                sock:close()
+            end
+            return nil, err
+        end
+        ngx.log(ngx.DEBUG, "TRAIL RECIEVED")
+        ngx.log(ngx.DEBUG, "DATA : ", data)
+        return "DATA", data
+    end
+end
 
 function _M.get(self, key)
 
@@ -56,46 +112,29 @@ function _M.get(self, key)
         return nil, err
     end
 
-    local line, err = sock:receive()
-    if not line then
-        if err == "timeout" then
-            sock:close()
+    local resp, data = read_response_line(self)
+    if resp == "LEN" then
+        resp, data = read_response_line(self, data)
+        if resp == "DATA" then
+            local resp, _ = read_response_line(self)
+            if resp == "DONE" then
+                return data, nil
+            else
+                return nil, _M.PROTOCOL_ERROR
+            end
+        else
+            return nil, _M.PROTOCOL_ERROR
         end
-        return nil, err
-    end
-
-    ngx.log(ngx.DEBUG, "Line ", line)
-
-    local len = match(line, '^LEN (%d+)$')
-    if not len then
-        return nil, nil
-    end
-
-    ngx.log(ngx.DEBUG, "LEN ", len)
-
-    local data, err = sock:receive(len)
-    if not data then
-        if err == "timeout" then
-            sock:close()
+    elseif resp == "ERROR" then
+        if data == "not_found" then
+            return nil, "not found"
+        else
+            return nil, data
         end
-        return nil, err
+    else
+        return nil, _M.PROTOCOL_ERROR
     end
 
-    ngx.log(ngx.DEBUG, "Data : ", data)
-
-    if data == "ERROR not_found" then
-        return nil, "not found"
-    end
-
-    line, err = sock:receive(8) -- discard the trailing "\r\nDONE\r\n"
-    if not line then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-
-    return data, nil
 end
 
 
@@ -113,30 +152,13 @@ function _M.delete(self, key)
         return nil, err
     end
 
-    local line, err = sock:receive()
-    if not line then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-
-    ngx.log(ngx.DEBUG, "Line 1 : ", line)
-
-
-    local line, err = sock:receive()
-    if not line then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-
-    ngx.log(ngx.DEBUG, "Line 2 : ", line)
-    if line == "DONE" then
+    local resp, data = read_response_line(self)
+    if resp == "DONE" then
         return 1, nil
+    elseif resp == "ERROR" then
+        return nil, data
     else
-        return nil, line
+        return nil, _M.PROTOCOL_ERROR
     end
 
 end
@@ -161,44 +183,24 @@ function _M.incr(self, key, value, init)
         return nil, err
     end
 
-    local line, err = sock:receive()
-    if not line then
-        if err == "timeout" then
-            sock:close()
+    local resp, data = read_response_line(self)
+    if resp == "LEN" then
+        resp, data = read_response_line(self, data)
+        if resp == "DATA" then
+            local resp, _ = read_response_line(self)
+            if resp == "DONE" then
+                return data, nil
+            else
+                return nil, _M.PROTOCOL_ERROR
+            end
+        else
+            return nil, _M.PROTOCOL_ERROR
         end
-        return nil, err
+    elseif resp == "ERROR" then
+        return nil, data
+    else
+        return nil, _M.PROTOCOL_ERROR
     end
-
-    if line == "ERROR not_found" then
-        return nil, "not found"
-    end
-
-    local len = match(line, '^LEN (%d+)$')
-    if not len then
-        return nil, nil
-    end
-
-    ngx.log(ngx.DEBUG, "LEN ", len)
-
-    local data, err = sock:receive(len)
-    if not data then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-
-    ngx.log(ngx.DEBUG, "Data : ", data)
-
-    line, err = sock:receive(8) -- discard the trailing "\r\nDONE\r\n"
-    if not line then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-
-    return data, nil
 
 end
 
@@ -226,37 +228,25 @@ function _M.set(self, key, value, exptime)
         return nil, err
     end
 
-    -- discard \r\n
-    sock:receive()
-
-    -- get operation result
-    local data, err = sock:receive(strlen(value))
-    if not data then
-        if err == "timeout" then
-            sock:close()
+    local resp, data = read_response_line(self)
+    if resp == "LEN" then
+        resp, data = read_response_line(self, data)
+        if resp == "DATA" then
+            local resp, _ = read_response_line(self)
+            if resp == "DONE" then
+                return data, nil
+            else
+                return nil, _M.PROTOCOL_ERROR
+            end
+        else
+            return nil, _M.PROTOCOL_ERROR
         end
-        return nil, err
+    elseif resp == "ERROR" then
+        return nil, data
+    else
+        return nil, _M.PROTOCOL_ERROR
     end
 
-    ngx.log(ngx.DEBUG, "Data : ", data)
-    sock:receive()
-
-    -- discard DONE
-    local done, err = sock:receive()
-    if not done then
-        if err == "timeout" then
-            sock:close()
-        end
-        return nil, err
-    end
-
-    ngx.log(ngx.DEBUG, "Done : ", done)
-
-    if done == "DONE" then
-        return 1
-    end
-
-    return nil, data
 end
 
 
@@ -282,33 +272,15 @@ function _M.touch(self, key, exptime)
         return nil, err
     end
 
-    local line, err = sock:receive()
-    if not line then
-        if err == "timeout" then
-            ngx.log(ngx.DEBUG, "Socket timeout")
-            sock:close()
-        end
-        return nil, err
+    local resp, data = read_response_line(self)
+    if resp == "DONE" then
+        return 1, nil
+    elseif resp == "ERROR" then
+        return nil, data
+    else
+        return nil, _M.PROTOCOL_ERROR
     end
 
-    ngx.log(ngx.DEBUG, "Line 1 : ", line)
-
-    local line, err = sock:receive()
-    if not line then
-        if err == "timeout" then
-            ngx.log(ngx.DEBUG, "Socket timeout")
-            sock:close()
-        end
-        return nil, err
-    end
-
-    ngx.log(ngx.DEBUG, "Done : ", line)
-
-    -- moxi server from couchbase returned stored after touching
-    if line == "DONE" then
-        return 1
-    end
-    return nil, line
 end
 
 
@@ -372,6 +344,5 @@ function _M.close(self)
 
     return sock:close()
 end
-
 
 return _M

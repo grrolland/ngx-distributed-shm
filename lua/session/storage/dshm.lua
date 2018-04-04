@@ -40,11 +40,11 @@ function shm.new(config)
     end
     local m = c.store or defaults.store
 
-    ngx.log(ngx.DEBUG, "Create Session With : ")
-    ngx.log(ngx.DEBUG, " -- host : ", defaults.host)
-    ngx.log(ngx.DEBUG, " -- port : ",defaults.port)
-    ngx.log(ngx.DEBUG, " -- pool_size : ", defaults.pool_size)
-    ngx.log(ngx.DEBUG, " -- pool_idle_timeout : ", defaults.pool_idle_timeout)
+    -- ngx.log(ngx.DEBUG, "Create Session With : ")
+    -- ngx.log(ngx.DEBUG, " -- host : ", defaults.host)
+    -- ngx.log(ngx.DEBUG, " -- port : ",defaults.port)
+    -- ngx.log(ngx.DEBUG, " -- pool_size : ", defaults.pool_size)
+    -- ngx.log(ngx.DEBUG, " -- pool_idle_timeout : ", defaults.pool_idle_timeout)
 
     local self = {
         store      = dshm:new(),
@@ -155,7 +155,7 @@ function shm:cookie(c)
 end
 
 function shm:open(cookie, lifetime)
-    ngx.log(ngx.DEBUG, "Open Session in progress ...")
+    -- ngx.log(ngx.DEBUG, "Open Session in progress ...")
     local r = self:cookie(cookie)
     if r and r[1] and r[2] and r[3] then
         local i, e, h = self.decode(r[1]), tonumber(r[2]), self.decode(r[3])
@@ -165,20 +165,20 @@ function shm:open(cookie, lifetime)
             self:touch(concat({self.name , k}, ":"), lifetime)
             d = ngx.decode_base64(d)
         end
-        ngx.log(ngx.DEBUG, "Open Session in done.")
+        -- ngx.log(ngx.DEBUG, "Open Session in done.")
         return i, e, d, h
     end
-    ngx.log(ngx.DEBUG, "Open Session in done : invalid.")
+    -- ngx.log(ngx.DEBUG, "Open Session in done : invalid.")
     return nil, "invalid"
 end
 
 function shm:start(i)
-    ngx.log(ngx.DEBUG, "Start Session done.")
+    -- ngx.log(ngx.DEBUG, "Start Session done.")
     return true, nil
 end
 
 function shm:save(i, e, d, h, close)
-    ngx.log(ngx.DEBUG, "Save Session in progress ...")
+    -- ngx.log(ngx.DEBUG, "Save Session in progress ...")
     local l = e - now()
     if l > 0 then
         local k = self:key(i)
@@ -186,17 +186,17 @@ function shm:save(i, e, d, h, close)
         if ok then
             return concat({ k, e, self.encode(h) }, self.delimiter)
         end
-        ngx.log(ngx.DEBUG, "Save Session in done.")
+        -- ngx.log(ngx.DEBUG, "Save Session in done.")
         return nil, err
     end
-    ngx.log(ngx.DEBUG, "Save Session in done : expired.")
+    -- ngx.log(ngx.DEBUG, "Save Session in done : expired.")
     return nil, "expired"
 end
 
 function shm:destroy(i)
-    ngx.log(ngx.DEBUG, "Destroy Session in progress ...")
+    -- ngx.log(ngx.DEBUG, "Destroy Session in progress ...")
     self:delete(concat({self.name , self:key(i)}, ":"))
-    ngx.log(ngx.DEBUG, "Destroy Session done.")
+    -- ngx.log(ngx.DEBUG, "Destroy Session done.")
     return true, nil
 end
 
