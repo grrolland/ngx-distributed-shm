@@ -47,7 +47,31 @@ public class SetTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    /**
+     * Test Setting a string with no expiration
+     */
+    @Test
+    public void testRegionSetStringNoExpire() {
+
+        try {
+            getWriter().write("SET region:key 0 10\r\n");
+            getWriter().write("AZERTYUIOP");
+            getWriter().flush();
+            String res = getReader().readLine();
+            Assert.assertEquals("LEN 10", res);
+            res = getReader().readLine();
+            Assert.assertEquals("AZERTYUIOP", res);
+            res = getReader().readLine();
+            Assert.assertEquals("DONE", res);
+        }
+        catch (IOException e)
+        {
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -71,7 +95,31 @@ public class SetTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    /**
+     * Test setting an integer with no expiration
+     */
+    @Test
+    public void testRegionSetIntNoExpire() {
+
+        try {
+            getWriter().write("SET region:key 0 10\r\n");
+            getWriter().write("1234567890");
+            getWriter().flush();
+            String res = getReader().readLine();
+            Assert.assertEquals("LEN 10", res);
+            res = getReader().readLine();
+            Assert.assertEquals("1234567890", res);
+            res = getReader().readLine();
+            Assert.assertEquals("DONE", res);
+        }
+        catch (IOException e)
+        {
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -91,7 +139,7 @@ public class SetTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -123,7 +171,39 @@ public class SetTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException | InterruptedException e )
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    /**
+     * Test setting an integer with expiration
+     */
+    @Test
+    public void testRegionSetIntExpire() {
+
+        try {
+            getWriter().write("SET region:key 1 10\r\n");
+            getWriter().write("1234567890");
+            getWriter().flush();
+            String res = getReader().readLine();
+            Assert.assertEquals("LEN 10", res);
+            res = getReader().readLine();
+            Assert.assertEquals("1234567890", res);
+            res = getReader().readLine();
+            Assert.assertEquals("DONE", res);
+
+            Thread.sleep(2000); // NOSONAR
+
+            getWriter().write("GET region:key\r\n");
+            getWriter().flush();
+            res = getReader().readLine();
+            Assert.assertEquals("ERROR not_found", res);
+
+        }
+        catch (IOException | InterruptedException e )
+        {
+            Assert.fail(e.getMessage());
         }
 
     }

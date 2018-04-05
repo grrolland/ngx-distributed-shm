@@ -22,6 +22,8 @@ package com.flutech.hcshm;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,6 +40,47 @@ public class ShmService {
      * The distributed Map storing keys and values
      */
     private IMap<String, ShmValue> shmMap;
+    /**
+     * The map of distributed map
+     */
+    private Map<String, IMap <String, ShmValue>> maps = new HashMap<String, IMap <String, ShmValue>>();
+
+    /**
+     * Get the map form the key name
+     * @param key the key
+     * @return return the named IMap, if no region in the key return the default IMap
+     */
+    private IMap<String, ShmValue> getMap(final String key) {
+        return getMapRegion(getRegion(key));
+    }
+
+    /**
+     * Get the map form the region name
+     * @param region the key
+     * @return return the named IMap, if no region return the default IMap
+     */
+    private IMap<String, ShmValue> getMapRegion(final String region) {
+        if (null != region) {
+            return hazelcast.getMap(region);
+        }
+        else {
+            return hazelcast.getMap("shmmap");
+        }
+    }
+
+    /**
+     * Get the region from the key
+     * @param key the key
+     * @return the region or null if no region
+     */
+    private String getRegion(String key) {
+        String region = null;
+        final String[] splitedKey = key.split(":");
+        if (splitedKey.length > 1) {
+            region = splitedKey[0];
+        }
+        return region;
+    }
 
     /**
      * Public Constructor
@@ -54,7 +97,7 @@ public class ShmService {
      * @return the value as string or the error
      */
     public String get(String key) {
-        ShmValue r = shmMap.get(key);
+        ShmValue r = getMap(key).get(key);
         if (null != r) {
             return r.getValue() ;
         }
@@ -71,7 +114,7 @@ public class ShmService {
      * @return the value set
      */
     public String set(String key, String value, int expire) {
-        shmMap.set(key, new ShmValue(value, expire), expire, TimeUnit.SECONDS);
+        getMap(key).set(key, new ShmValue(value, expire), expire, TimeUnit.SECONDS);
         return value;
     }
 
@@ -84,7 +127,7 @@ public class ShmService {
      */
     public String set(String key, long value, int expire) {
         String r =   Long.toString(value);
-        shmMap.set(key, new ShmValue(r, expire), expire, TimeUnit.SECONDS);
+        getMap(key).set(key, new ShmValue(r, expire), expire, TimeUnit.SECONDS);
         return r;
     }
 
@@ -94,13 +137,13 @@ public class ShmService {
      * @param expire the expiration in seconds
      */
     public void touch(String key, int expire) {
-        shmMap.lock(key);
-        final ShmValue r = shmMap.get(key);
+        getMap(key).lock(key);
+        final ShmValue r = getMap(key).get(key);
         if (null != r) {
             r.expire(expire);
-            shmMap.set(key, r, expire, TimeUnit.SECONDS);
+            getMap(key).set(key, r, expire, TimeUnit.SECONDS);
         }
-        shmMap.unlock(key);
+        getMap(key).unlock(key);
     }
 
     /**
@@ -111,8 +154,8 @@ public class ShmService {
      * @return the new value as string representation
      */
     public String incr(String key, int value, int init) {
-        shmMap.lock(key);
-        final ShmValue r = shmMap.get(key);
+        getMap(key).lock(key);
+        final ShmValue r = getMap(key).get(key);
         String newval = null;
         int expire = 0;
         if (null != r) {
@@ -132,13 +175,13 @@ public class ShmService {
             newval = Long.toString((long) value + (long) init);
         }
         if (expire >= 0) {
-            shmMap.set(key, new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
+            getMap(key).set(key, new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
         }
         else
         {
-            shmMap.remove(key);
+            getMap(key).remove(key);
         }
-        shmMap.unlock(key);
+        getMap(key).unlock(key);
 
         return newval;
     }
@@ -148,6 +191,15 @@ public class ShmService {
      * @param key the key to delete
      */
     public void delete(String key) {
-        shmMap.delete(key);
+        getMap(key).delete(key);
     }
+
+    /**
+     * Remove all entries from the region by clearing the map cluster wide
+     * @param region the region name
+     */
+    public void flushall(String region) {
+        getMapRegion(region).clear();
+    }
+
 }

@@ -48,24 +48,6 @@ public class AbstractHCSHMGetTestCase {
     private BufferedWriter writer = null;
 
     /**
-     * Init the test case : launch the distributed memory
-     */
-    @BeforeClass
-    public static void init() throws InterruptedException {
-
-        System.setProperty("ngx-distributed-shm.bind_address", "0.0.0.0");
-        System.setProperty("ngx-distributed-shm.port", "40321");
-        System.setProperty("ngx-distributed-shm.enable_jmx_counter", "false");
-
-        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        root.setLevel(Level.INFO);
-
-        Main.main(new String[] {});
-        Thread.sleep(10000); // NOSONAR
-
-    }
-
-    /**
      * Init Socket, Reader and Writer
      */
     @Before

@@ -64,6 +64,9 @@ public class CommandFactory {
             case INCR:
                 command = new IncrCommand(service);
                 break;
+            case FLUSHALL:
+                command = new FlushAllCommand(service);
+                break;
             default:
                 command = new UnknownCommand(service);
                 break;

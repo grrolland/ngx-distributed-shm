@@ -26,26 +26,26 @@ import java.io.IOException;
 /**
  * Global Protocol Test Case
  */
-public class DeleteTestCase extends  AbstractHCSHMGetTestCase {
+public class FlushAllTestCase extends  AbstractHCSHMGetTestCase {
 
     /**
-     * Test deleting a key
+     * Test flushall
      */
     @Test
-    public void testDelete() {
+    public void testFlushAll() {
 
         try {
             getWriter().write("SET key 0 10\r\n");
-            getWriter().write("1234567890");
+            getWriter().write("AZERTYUIOP");
             getWriter().flush();
             String res = getReader().readLine();
             Assert.assertEquals("LEN 10", res);
             res = getReader().readLine();
-            Assert.assertEquals("1234567890", res);
+            Assert.assertEquals("AZERTYUIOP", res);
             res = getReader().readLine();
             Assert.assertEquals("DONE", res);
 
-            getWriter().write("DELETE key\r\n");
+            getWriter().write("FLUSHALL\r\n");
             getWriter().flush();
             res = getReader().readLine();
             Assert.assertEquals("DONE", res);
@@ -54,33 +54,32 @@ public class DeleteTestCase extends  AbstractHCSHMGetTestCase {
             getWriter().flush();
             res = getReader().readLine();
             Assert.assertEquals("ERROR not_found", res);
-
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }
 
     /**
-     * Test deleting a key in a region
+     * Test flushall region
      */
     @Test
-    public void testRegionDelete() {
+    public void testRegionFlushAll() {
 
         try {
             getWriter().write("SET region:key 0 10\r\n");
-            getWriter().write("1234567890");
+            getWriter().write("AZERTYUIOP");
             getWriter().flush();
             String res = getReader().readLine();
             Assert.assertEquals("LEN 10", res);
             res = getReader().readLine();
-            Assert.assertEquals("1234567890", res);
+            Assert.assertEquals("AZERTYUIOP", res);
             res = getReader().readLine();
             Assert.assertEquals("DONE", res);
 
-            getWriter().write("DELETE region:key\r\n");
+            getWriter().write("FLUSHALL region\r\n");
             getWriter().flush();
             res = getReader().readLine();
             Assert.assertEquals("DONE", res);
@@ -89,7 +88,6 @@ public class DeleteTestCase extends  AbstractHCSHMGetTestCase {
             getWriter().flush();
             res = getReader().readLine();
             Assert.assertEquals("ERROR not_found", res);
-
         }
         catch (IOException e)
         {
@@ -102,10 +100,10 @@ public class DeleteTestCase extends  AbstractHCSHMGetTestCase {
      * Test getting a non existent key
      */
     @Test
-    public void testDeleteMalformed() {
+    public void testGetMalformed() {
 
         try {
-            getWriter().write("DELETE notexists bababi\r\n");
+            getWriter().write("FLUSHALL notexists bababi\r\n");
             getWriter().flush();
             String res = getReader().readLine();
             Assert.assertEquals("ERROR malformed_request", res);
@@ -117,5 +115,6 @@ public class DeleteTestCase extends  AbstractHCSHMGetTestCase {
         }
 
     }
+
 
 }

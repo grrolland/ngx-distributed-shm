@@ -43,7 +43,7 @@ public class QuitTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -63,7 +63,7 @@ public class QuitTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }

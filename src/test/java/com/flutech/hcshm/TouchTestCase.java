@@ -60,7 +60,7 @@ public class TouchTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException | InterruptedException e )
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -101,7 +101,7 @@ public class TouchTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException | InterruptedException e )
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -120,7 +120,7 @@ public class TouchTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }
@@ -140,7 +140,7 @@ public class TouchTestCase extends  AbstractHCSHMGetTestCase {
         }
         catch (IOException e)
         {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
 
     }

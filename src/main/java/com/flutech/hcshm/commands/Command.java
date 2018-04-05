@@ -134,6 +134,19 @@ public abstract class Command {
     }
 
     /**
+     * Assert command tokens contains expected token number
+     * @param commandTokens the command tokens
+     * @param minToken the min expected token numbers
+     * @param maxToken the max expected token numbers
+     * @throws ProtocolException if the command token numbers is different from expected
+     */
+    protected void assertTokens(String[] commandTokens, int minToken, int maxToken) throws ProtocolException {
+        if(commandTokens.length < minToken || commandTokens.length > maxToken) {
+            throw  new ProtocolException();
+        }
+    }
+
+    /**
      * Get the key from command token
      * @param commandToken the command token
      * @return the key

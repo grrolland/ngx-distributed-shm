@@ -46,6 +46,10 @@ public enum CommandVerb {
      */
     DELETE,
     /**
+     * The flush All Command
+     */
+    FLUSHALL,
+    /**
      * Unknown Command
      */
     UNKNOWN
