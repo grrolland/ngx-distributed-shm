@@ -50,8 +50,7 @@ CLASSPATH=$DSHM_HOME/conf:$DSHM_HOME/lib/ngx-distributed-shm.jar
 PID=$(cat "${PID_FILE}" )
 if [ -z "${PID}" ]; then
     echo "Process ID for dshm instance is written to location: {$PID_FILE}"
-    $RUN_JAVA -server $JAVA_OPTS -cp $CLASSPATH com.flutech.hcshm.Main &
-    echo $! > ${PID_FILE}
+    $($RUN_JAVA -server $JAVA_OPTS -cp $CLASSPATH com.flutech.hcshm.Main && echo $! > ${PID_FILE}) &
 else
     echo "Another dshm instance (PID=${PID}) is already started in this folder."
     exit 0
