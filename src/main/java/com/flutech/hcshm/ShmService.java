@@ -37,15 +37,6 @@ public class ShmService {
     private HazelcastInstance hazelcast;
 
     /**
-     * The distributed Map storing keys and values
-     */
-    private IMap<String, ShmValue> shmMap;
-    /**
-     * The map of distributed map
-     */
-    private Map<String, IMap <String, ShmValue>> maps = new HashMap<String, IMap <String, ShmValue>>();
-
-    /**
      * Get the map form the key name
      * @param key the key
      * @return return the named IMap, if no region in the key return the default IMap
@@ -88,7 +79,6 @@ public class ShmService {
      */
     public ShmService(HazelcastInstance hazelcast) {
         this.hazelcast = hazelcast;
-        shmMap = this.hazelcast.getMap("shmmap");
     }
 
     /**
