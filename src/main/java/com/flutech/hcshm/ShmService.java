@@ -21,9 +21,6 @@ package com.flutech.hcshm;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
