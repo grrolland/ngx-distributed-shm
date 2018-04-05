@@ -81,7 +81,7 @@ local function read_response_line(self, data)
             ngx.log(ngx.DEBUG, "DONE")
             return "DONE", nil
         end
-        local error = match(line, '^ERROR (%a+)$')
+        local error = match(line, '^ERROR (%.+)$')
         if error then
             ngx.log(ngx.DEBUG, "ERROR", error)
             return "ERROR", error
