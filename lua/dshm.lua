@@ -7,6 +7,8 @@ local strlen = string.len
 local setmetatable = setmetatable
 local tonumber = tonumber
 local math = math
+local tostring = tostring
+local table = table
 local ngx = ngx
 
 local _M = {
@@ -16,13 +18,24 @@ local _M = {
 
 local mt = { __index = _M }
 
+local function escape(key)
+    local i = 1
+    local result = {}
+    for m in (tostring(key) .. ":"):gmatch("([^:]*):") do
+        result[i] = escape_uri(m)
+        i = i + 1
+    end
+    ngx.log(ngx.DEBUG, "escape result : ", table.concat(result, ":"))
+    return table.concat(result, ":")
+end
+
 function _M.new(self, opts)
     local sock, err = tcp()
     if not sock then
         return nil, err
     end
 
-    local escape_key = escape_uri
+    local escape_key = escape
     local unescape_key = unescape_uri
 
     if opts then
