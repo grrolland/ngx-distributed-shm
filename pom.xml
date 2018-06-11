@@ -6,7 +6,7 @@
 
     <groupId>com.flutech</groupId>
     <artifactId>ngx-distributed-shm</artifactId>
-    <version>1.0.0-RC4</version>
+    <version>1.0.0</version>
 
 
     <url>https://github.com/grrolland/ngx-distributed-shm</url>
@@ -18,8 +18,8 @@
     </scm>
 
     <properties>
-        <vertx.version>3.5.1</vertx.version>
-        <hazelcast.version>3.9.3</hazelcast.version>
+        <vertx.version>3.5.2</vertx.version>
+        <hazelcast.version>3.10.2</hazelcast.version>
 
 
         <sonar.sources>src/main</sonar.sources>
