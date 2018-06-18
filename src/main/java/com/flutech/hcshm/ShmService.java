@@ -19,8 +19,14 @@ package com.flutech.hcshm;
 
 
 
+import com.flutech.hcshm.processor.IncrProcessor;
+import com.flutech.hcshm.processor.TouchProcessor;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.hazelcast.map.EntryBackupProcessor;
+import com.hazelcast.map.EntryProcessor;
+
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -34,41 +40,9 @@ public class ShmService {
     private HazelcastInstance hazelcast;
 
     /**
-     * Get the map form the key name
-     * @param key the key
-     * @return return the named IMap, if no region in the key return the default IMap
+     * Region Locator
      */
-    private IMap<String, ShmValue> getMap(final String key) {
-        return getMapRegion(getRegion(key));
-    }
-
-    /**
-     * Get the map form the region name
-     * @param region the key
-     * @return return the named IMap, if no region return the default IMap
-     */
-    private IMap<String, ShmValue> getMapRegion(final String region) {
-        if (null != region) {
-            return hazelcast.getMap(region);
-        }
-        else {
-            return hazelcast.getMap("shmmap");
-        }
-    }
-
-    /**
-     * Get the region from the key
-     * @param key the key
-     * @return the region or null if no region
-     */
-    private String getRegion(String key) {
-        String region = null;
-        final String[] splitedKey = key.split(":");
-        if (splitedKey.length > 1) {
-            region = splitedKey[0];
-        }
-        return region;
-    }
+    private ShmRegionLocator regionLocator = new ShmRegionLocator();
 
     /**
      * Public Constructor
@@ -76,6 +50,15 @@ public class ShmService {
      */
     public ShmService(HazelcastInstance hazelcast) {
         this.hazelcast = hazelcast;
+    }
+
+    /**
+     * Get the map form the key name
+     * @param key the key
+     * @return return the named IMap, if no region in the key return the default IMap
+     */
+    private IMap<String, ShmValue> getMap(final String key) {
+        return regionLocator.getMap(hazelcast, key);
     }
 
     /**
@@ -124,13 +107,7 @@ public class ShmService {
      * @param expire the expiration in seconds
      */
     public void touch(String key, int expire) {
-        getMap(key).lock(key);
-        final ShmValue r = getMap(key).get(key);
-        if (null != r) {
-            r.expire(expire);
-            getMap(key).set(key, r, expire, TimeUnit.SECONDS);
-        }
-        getMap(key).unlock(key);
+        getMap(key).executeOnKey(key, new TouchProcessor(expire));
     }
 
     /**
@@ -141,36 +118,7 @@ public class ShmService {
      * @return the new value as string representation
      */
     public String incr(String key, int value, int init) {
-        getMap(key).lock(key);
-        final ShmValue r = getMap(key).get(key);
-        String newval = null;
-        int expire = 0;
-        if (null != r) {
-
-            try
-            {
-                newval = Long.toString(Long.parseLong(r.getValue()) + value);
-            }
-            catch (NumberFormatException e)
-            {
-                newval = r.getValue();
-            }
-            expire = r.getLastingTime();
-        }
-        else
-        {
-            newval = Long.toString((long) value + (long) init);
-        }
-        if (expire >= 0) {
-            getMap(key).set(key, new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
-        }
-        else
-        {
-            getMap(key).remove(key);
-        }
-        getMap(key).unlock(key);
-
-        return newval;
+        return (String) getMap(key).executeOnKey(key, new IncrProcessor(value, init));
     }
 
     /**
@@ -186,7 +134,7 @@ public class ShmService {
      * @param region the region name
      */
     public void flushall(String region) {
-        getMapRegion(region).clear();
+        regionLocator.getMapRegion(hazelcast, region).clear();
     }
 
 }

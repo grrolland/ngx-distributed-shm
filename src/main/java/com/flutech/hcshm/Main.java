@@ -38,10 +38,8 @@ public class Main {
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
         System.setProperty("hazelcast.logging.type", "slf4j");
 
-        HazelcastInstance instance = Hazelcast.newHazelcastInstance(null);
-
         final VertxOptions vertxOptions = new VertxOptions()
-                .setWorkerPoolSize(1);
+                .setWorkerPoolSize(Configuration.getWorkers());
 
         if (Configuration.getEnableJMXCounter()) {
             vertxOptions.setMetricsOptions(
@@ -53,8 +51,8 @@ public class Main {
         }
 
         Vertx vertx = Vertx.vertx(vertxOptions);
-        DeploymentOptions options = new DeploymentOptions().setWorker(true);
-        vertx.deployVerticle(new ShmTcpServer(new ShmService(instance)), options, stringAsyncResult ->
+        DeploymentOptions options = new DeploymentOptions().setWorker(true).setInstances(Configuration.getWorkers());
+        vertx.deployVerticle(ShmTcpServer.class, options, stringAsyncResult ->
             Runtime.getRuntime().addShutdownHook(new Thread()
             {
                 /**
@@ -63,7 +61,7 @@ public class Main {
                 @Override
                 public void run()
                 {
-                    instance.shutdown();
+                    HazelcastInstanceHandler.getInstance().shutdown();
                     vertx.close();
                 }
             })

@@ -33,6 +33,10 @@ public class Configuration {
      * Default Bind Address
      */
     public static final String DEFAULT_BIND_ADDRESS = "localhost";
+    /**
+     * Default workers
+     */
+    public static final int DEFAULT_WORKERS = 4;
 
     /**
      * Private default constructor
@@ -52,6 +56,21 @@ public class Configuration {
         catch (NumberFormatException e)
         {
             return DEFAULT_PORT;
+        }
+    }
+
+    /**
+     * Get the bind port of the server with the ngx-distributed-shm.port system property
+     * @return the bind port (4321 by default)
+     */
+    public static int getWorkers() {
+        try
+        {
+            return Integer.parseInt(System.getProperty("ngx-distributed-shm.workers", Integer.toString(DEFAULT_WORKERS)));
+        }
+        catch (NumberFormatException e)
+        {
+            return DEFAULT_WORKERS;
         }
     }
 

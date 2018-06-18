@@ -17,6 +17,7 @@
  */
 package com.flutech.hcshm;
 
+import com.hazelcast.core.Hazelcast;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
@@ -36,10 +37,9 @@ public class ShmTcpServer extends AbstractVerticle {
 
     /**
      * Public Constructor
-     * @param service The Shared memory service
      */
-    public ShmTcpServer(ShmService service) {
-        this.service = service;
+    public ShmTcpServer() {
+        this.service = new ShmService(HazelcastInstanceHandler.getInstance());
     }
 
     /**
