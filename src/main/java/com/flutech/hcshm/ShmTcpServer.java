@@ -17,7 +17,6 @@
  */
 package com.flutech.hcshm;
 
-import com.hazelcast.core.Hazelcast;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;

@@ -30,10 +30,17 @@ public class HazelcastInstanceHandler {
     private static HazelcastInstance instance = null;
 
     /**
+     * Private Constructor (utility class)
+     */
+    private HazelcastInstanceHandler() {
+
+    }
+
+    /**
      * Hazelcast instance getter
      * @return the unique hazelcast instance
      */
-    public synchronized static HazelcastInstance getInstance() {
+    public static synchronized HazelcastInstance getInstance() {
         if (instance == null) {
             instance = Hazelcast.newHazelcastInstance();
         }

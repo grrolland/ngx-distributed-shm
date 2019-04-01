@@ -78,7 +78,7 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue>, Serializ
         }
         else
         {
-            newval = Long.toString((long) value + (long) init);
+            newval = Long.toString(value + (long) init);
         }
         IMap<String, ShmValue> map = regionLocator.getMap(HazelcastInstanceHandler.getInstance(), entry.getKey());
         if (expire >= 0) {
