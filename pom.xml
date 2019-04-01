@@ -18,8 +18,8 @@
     </scm>
 
     <properties>
-        <vertx.version>3.5.2</vertx.version>
-        <hazelcast.version>3.10.2</hazelcast.version>
+        <vertx.version>3.6.3</vertx.version>
+        <hazelcast.version>3.11.2</hazelcast.version>
 
 
         <sonar.sources>src/main</sonar.sources>
