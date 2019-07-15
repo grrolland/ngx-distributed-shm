@@ -320,7 +320,7 @@ set $session_encoder           base64;
 set $session_cookie_persistent off;
 set $session_cookie_renew      600;
 set $session_cookie_samesite   Lax;
-set $session_secret ratWkmF7Fvt7JhXxiNm9vkAxiNm9vV3fbpKO+Ok5s=;
+set $session_secret a_secret_string;
 ```
 
 The session_storage parameter control the storage module to be used.
