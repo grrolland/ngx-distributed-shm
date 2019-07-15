@@ -8,6 +8,30 @@ This projet is memcached like server based on Hazelcast and Vertx. The goals of 
 
 The semantic of the protocol is the same as the [lua.shared](https://github.com/openresty/lua-nginx-module#ngxshareddict) semantic.
 
+## Use cases
+
+This project was succesfully used to store rate limiting counter across a cluster of an Nginx based API Gateway in a french banking company. 
+
+This project was succesfully used to distribute OpenID Connect Replying Party (based on zmartzone/lua-resty-openidc
+) web session with the library bungle/lua-resty-session in a french banking company.
+
+## Principle Schema
+
+    -------------------    -------------------    -------------------
+    |                 |    |                 |    |                 |
+    | Nginx/Openresty |    | Nginx/Openresty |    | Nginx/Openresty |
+    |        1        |    |        2        |    |        3        |
+    -------------------    -------------------    -------------------
+             | (127.0.0.1:4321)     | (127.0.0.1:4321)     | (127.0.0.1:4321)
+    -------------------    -------------------    -------------------
+    |                 |    |                 |    |                 |
+    |       DSHM      |    |       DSHM      |    |       DSHM      |
+    |        1        |    |        2        |    |        3        |
+    -------------------    -------------------    -------------------
+             |                      |                       |
+             |                Data Replication              |
+             |______________________|_______________________|
+
 ## Dependencies
 
 **ngx-distributed-shm** depends on followings libraries :
@@ -48,6 +72,14 @@ The semantic of the protocol is the same as the [lua.shared](https://github.com/
  ``` 
  java -cp ngx-distributed-shm.jar com.flutech.hcshm.Main
  ```
+ 
+ To startup with a configuration directory ./conf (with hazelcast.xml and logback.xml) use :
+ 
+ ``` 
+ java -cp ngx-distributed-shm.jar:./conf com.flutech.hcshm.Main
+ ```
+ 
+ The dist/bin directroy contains startup and shutdown scripts.
  
  ## Startup Options
  
@@ -120,6 +152,43 @@ This is an example of this file :
 The reference documentation for this configuration is here : https://docs.hazelcast.org/docs/3.12.1/manual/html-single/index.html#tcp-ip-element
 
 This configuration works well for a two menber cluster of the distributed shared memory.
+
+## Logging
+
+The dist/conf directory contains an exemple logback.xml which control logging. The example file is the following : 
+
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <contextName>ngx-dshm</contextName>
+    <jmxConfigurator/>
+
+    <appender name="FILE-GLOBAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ngx-distributed-shm.log_dir}/ngx-dshm.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${ngx-distributed-shm.log_dir}/ngx-dshm-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS,Europe/Paris} [%thread] %-5level %logger{36} - %msg %xEx{20}%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE-GLOBAL" />
+    </appender>
+
+
+    <root level="info">
+        <appender-ref ref="ASYNC"/>
+    </root>
+
+</configuration>
+```
+
+Starting the dshm with the ***-Dngx-distributed-shm.log_dir=log_dir*** permit to choose the logging directory.
+
   
 ## Protocol
 
