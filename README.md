@@ -44,6 +44,11 @@ The semantic of the protocol is the same as the [lua.shared](https://github.com/
  java -jar ngx-distributed-shm.jar
  ```
  
+ Or : 
+ ``` 
+ java -cp ngx-distributed-shm.jar com.flutech.hcshm.Main
+ ```
+ 
  ## Startup Options
  
  ***-Dngx-distributed-shm.port=port***
@@ -57,7 +62,7 @@ The semantic of the protocol is the same as the [lua.shared](https://github.com/
   java -Dngx-distributed-shm.port=40000 -jar ngx-distributed-shm.jar
 ```
  
- ***-Dngx-distributed-shm.bind_address=address***
+***-Dngx-distributed-shm.bind_address=address***
 **default :** *127.0.0.1*
 
 Startup the storage and bind the protocol on address <address>.
@@ -67,6 +72,54 @@ Startup the storage and bind the protocol on address <address>.
 ```
   java -Dngx-distributed-shm.bind_address=192.168.0.1 -jar ngx-distributed-shm.jar
 ```
+
+### Configure the hazelcast IMDG map for replication 
+
+The hazelcast IMDG is configured with a configuration file which must be present in the classpath. The file must be named hazelcast.xml.
+
+This is an example of this file :
+
+```
+<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.9.xsd"
+           xmlns="http://www.hazelcast.com/schema/config"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <group>
+        <name>ngx-dshm</name>
+        <password>FIXME</password>
+    </group>
+    <network>
+        <port auto-increment="false">5701</port>
+        <join>
+            <multicast enabled="false" />
+            <tcp-ip enabled="true">
+                <interface>10.0.x.y</interface>
+                <member-list>
+                    <member>10.0.x.y:5701</member>
+                    <member>10.0.x.z:5701</member>
+                </member-list>
+            </tcp-ip>
+            <aws enabled="false" />
+        </join>
+    </network>
+    <map name="default">
+        <in-memory-format>BINARY</in-memory-format>
+        <backup-count>1</backup-count>
+        <async-backup-count>0</async-backup-count>
+        <time-to-live-seconds>0</time-to-live-seconds>
+        <max-idle-seconds>0</max-idle-seconds>
+        <eviction-policy>NONE</eviction-policy>
+        <max-size policy="PER_NODE">0</max-size>
+        <eviction-percentage>25</eviction-percentage>
+        <min-eviction-check-millis>100</min-eviction-check-millis>
+        <merge-policy>com.hazelcast.map.merge.PutIfAbsentMapMergePolicy</merge-policy>
+        <cache-deserialized-values>INDEX-ONLY</cache-deserialized-values>
+    </map>
+</hazelcast>
+```
+
+The reference documentation for this configuration is here : https://docs.hazelcast.org/docs/3.12.1/manual/html-single/index.html#tcp-ip-element
+
+This configuration works well for a two menber cluster of the distributed shared memory.
   
 ## Protocol
 
@@ -81,6 +134,26 @@ The command line part has the following format :
 ```
 COMMAND ARG1 ARG2 ARGN\r\n
 ```
+
+The ***ARG1*** is alway the ***key***
+
+### Anatomy of a key : region cache support
+
+The distributed shared memory support region partionning. The format of the key control the region where will be located the value.
+
+This key ***key1*** will be located in the region ***region1*** : 
+
+```
+region1::key1
+```
+
+This key ***key1*** will be located in the default region  : 
+
+```
+key1
+```
+
+This permit to control the hazelast map where will be stored the key/value.
 
 ### Data part
 
@@ -168,7 +241,7 @@ Delete the key \<key\> from the storage. This operation is atomic.
 When the key does not exist the command does nothing.
  
 ```
-DELETE key 10\r\n
+DELETE key\r\n
 ```
 
 ***INCR \<key\> \<value\> \<init\>***
@@ -186,3 +259,71 @@ This operation is atomic.
 ```
 INCR key -1 0\r\n
 ```
+
+***FLUSHALL [region]***
+
+**with data:** *no*
+
+Remove all the key from the region. The region is optionnal. Without region parameter, the default region is flush.
+ 
+This operation is atomic.
+
+```
+FLUSHALL\r\n
+```
+
+Or :
+
+```
+FLUSHALL region1\r\n
+```
+
+***QUIT***
+
+**with data:** *no*
+
+Close the connection with the server.
+
+```
+QUIT\r\n
+```
+
+## LUA libraries support
+
+The lua libraries (lua/dshm.lua) is used to pilot the shared memory. The librarie should be installed in the resty disrectory of the openresty distribution.
+
+This is an exemple to use it :
+
+```
+local dshm = require "resty.dshm"
+
+local store = dshm:new()
+
+store:connect("127.0.0.1", 4321)
+
+store:set("key", 10)
+local value = store:get("key")
+store:incr("key")
+store:delete("key")
+```
+
+### Resty Session support
+
+This module could be used to activate session replication with the excellent lua library Resty Session (https://github.com/bungle/lua-resty-session)
+
+To use it, copy the lua extention in your resty/session/storage directory and use this type of configuration in your nginx.conf : 
+
+```
+set $session_storage           dshm;
+set $session_serializer        json;
+set $session_encoder           base64;
+set $session_cookie_persistent off;
+set $session_cookie_renew      600;
+set $session_cookie_samesite   Lax;
+set $session_secret ratWkmF7Fvt7JhXxiNm9vkAxiNm9vV3fbpKO+Ok5s=;
+```
+
+The session_storage parameter control the storage module to be used.
+
+
+
