@@ -8,6 +8,10 @@ This projet is memcached like server based on Hazelcast and Vertx. The goals of 
 
 The semantic of the protocol is the same as the [lua.shared](https://github.com/openresty/lua-nginx-module#ngxshareddict) semantic.
 
+## Status
+
+Production Ready since 06/2018.
+
 ## Use cases
 
 This project was succesfully used to store rate limiting counter across a cluster of an Nginx based API Gateway in a french banking company. 
