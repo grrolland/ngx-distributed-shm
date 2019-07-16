@@ -1,4 +1,3 @@
-local lock         = require "resty.lock"
 local setmetatable = setmetatable
 local tonumber     = tonumber
 local concat       = table.concat
@@ -14,18 +13,10 @@ end
 
 local defaults = {
     store      = var.session_dshm_store or "sessions",
-    uselocking = enabled(var.session_dshm_uselocking or false),
     host       = var.session_dshm_host or "127.0.0.1",
     port       = tonumber(var.session_dshm_port) or 4321,
     pool_size  = tonumber(var.session_dshm_pool_size) or 100,
-    pool_idle_timeout = tonumber(var.session_dshm_pool_idle_timeout) or 1000,
-    lock       = {
-        exptime  = tonumber(var.session_dshm_lock_exptime)  or 30,
-        timeout  = tonumber(var.session_dshm_lock_timeout)  or 5,
-        step     = tonumber(var.session_dshm_lock_step)     or 0.001,
-        ratio    = tonumber(var.session_dshm_lock_ratio)    or 2,
-        max_step = tonumber(var.session_dshm_lock_max_step) or 0.5,
-    }
+    pool_idle_timeout = tonumber(var.session_dshm_pool_idle_timeout) or 1000
 }
 
 local shm = {}
@@ -34,10 +25,6 @@ shm.__index = shm
 
 function shm.new(config)
     local c = config.shm or defaults
-    local l = enabled(c.uselocking)
-    if l == nil then
-        l = defaults.uselocking
-    end
     local m = c.store or defaults.store
 
     -- ngx.log(ngx.DEBUG, "Create Session With : ")
@@ -55,20 +42,8 @@ function shm.new(config)
         host       = defaults.host,
         port       = defaults.port,
         pool_size  = defaults.pool_size,
-        pool_idle_timeout = defaults.pool_idle_timeout,
-        uselocking = l
+        pool_idle_timeout = defaults.pool_idle_timeout
     }
-    if l then
-        local x = c.lock or defaults.lock
-        local s = {
-            exptime  = tonumber(x.exptime)  or defaults.exptime,
-            timeout  = tonumber(x.timeout)  or defaults.timeout,
-            step     = tonumber(x.step)     or defaults.step,
-            ratio    = tonumber(x.ratio)    or defaults.ratio,
-            max_step = tonumber(x.max_step) or defaults.max_step
-        }
-        self.lock = lock:new(m, s)
-    end
     return setmetatable(self, shm)
 end
 
