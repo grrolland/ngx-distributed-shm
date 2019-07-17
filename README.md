@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/grrolland/ngx-distributed-shm.svg?branch=master)](https://travis-ci.org/grrolland/ngx-distributed-shm)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.flutech%3Angx-distributed-shm&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.flutech:ngx-distributed-shm)
-[![Technical debt ratio](https://sonarcloud.io/api/project_badges/measure?project=com.flutech%3Angx-distributed-shm&metric=sqale_index)](https://sonarcloud.io/dashboard/index/com.flutech:ngx-distributed-shm)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.flutech%3Angx-distributed-shm&metric=coverage)](https://sonarcloud.io/dashboard/index/com.flutech:ngx-distributed-shm)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=alert_status)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
+[![Technical debt ratio](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=sqale_index)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=coverage)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 # ngx-distributed-shm
 
 This projet is memcached like server based on Hazelcast and Vertx. The goals of the project is to build an easy-to-use distributed memory storage with the nginx shared memory semantic for use with lua nginx plugin.
@@ -74,13 +74,13 @@ This project was succesfully used to distribute OpenID Connect Replying Party (b
  
  Or : 
  ``` 
- java -cp ngx-distributed-shm.jar com.flutech.hcshm.Main
+ java -cp ngx-distributed-shm.jar io.github.grrolland.hcshm.Main
  ```
  
  To startup with a configuration directory ./conf (with hazelcast.xml and logback.xml) use :
  
  ``` 
- java -cp ngx-distributed-shm.jar:./conf com.flutech.hcshm.Main
+ java -cp ngx-distributed-shm.jar:./conf io.github.grrolland.hcshm.Main
  ```
  
  The dist/bin directroy contains startup and shutdown scripts.
