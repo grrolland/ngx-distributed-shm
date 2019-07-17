@@ -23,6 +23,7 @@ deploy:
      - lua/dshm.lua
      - lua/session/storage/dshm.lua
    skip_cleanup: true
+   overwrite: true
    on:
      repo: grrolland/ngx-distributed-shm
      name: $project_version
