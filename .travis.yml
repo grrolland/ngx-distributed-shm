@@ -5,7 +5,7 @@ install: true
 jdk:
   - openjdk8
 addons:
-  sonarqube:
+  sonarcloud:
     organization: grrolland-github
 
 script:
