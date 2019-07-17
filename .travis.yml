@@ -8,7 +8,7 @@ addons:
     organization: grrolland-github
 
 script:
-  - mvn package -DskipTests
+  - mvn clean package -DskipTests
   - sh ./runSonarQubeAnalysis.sh
 
 before_deploy:
