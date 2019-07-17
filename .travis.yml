@@ -11,6 +11,23 @@ addons:
 script:
   - sh ./runSonarQubeAnalysis.sh
 
+before_deploy:
+  - mvn help:evaluate -N -Dexpression=project.version|grep -v '\['
+  - export project_version=$(mvn help:evaluate -N -Dexpression=project.version|grep -v '\[')
+
+deploy:
+   provider: releases
+   user: "grrolland"
+   password: $GITHUB_PASSWORD
+   file:
+     - target/ngx-distributed-shm-$project_version.jar
+     - lua/dshm.lua
+     - lua/session/storage/dshm.lua
+   skip_cleanup: true
+   on:
+     repo: grrolland/ngx-distributed-shm
+     name: $project_version
+
 cache:
   directories:
     - '$HOME/.m2/repository'
