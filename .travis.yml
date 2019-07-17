@@ -17,8 +17,7 @@ before_deploy:
 
 deploy:
    provider: releases
-   user: "grrolland"
-   password: $GITHUB_PASSWORD
+   api_key: $GITHUB_OAUTH_TOKEN
    file:
      - target/ngx-distributed-shm-$project_version.jar
      - lua/dshm.lua
