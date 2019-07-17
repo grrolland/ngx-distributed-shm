@@ -9,6 +9,7 @@ addons:
     organization: grrolland-github
 
 script:
+  - mvn package
   - sh ./runSonarQubeAnalysis.sh
 
 before_deploy:
