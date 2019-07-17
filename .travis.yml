@@ -1,6 +1,5 @@
 language: java
 sudo: required
-install: true
 
 jdk:
   - openjdk8
@@ -27,6 +26,14 @@ deploy:
      tags: true
      repo: grrolland/ngx-distributed-shm
      name: $project_version
+
+before_install:
+  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+
+install:
+  - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+  - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
 
 cache:
   directories:
