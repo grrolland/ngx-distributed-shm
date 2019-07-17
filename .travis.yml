@@ -20,11 +20,10 @@ deploy:
    api_key: $GITHUB_OAUTH_TOKEN
    file:
      - target/ngx-distributed-shm-$project_version.jar
-     - lua/dshm.lua
-     - lua/session/storage/dshm.lua
    skip_cleanup: true
    overwrite: true
    on:
+     tags: true
      repo: grrolland/ngx-distributed-shm
      name: $project_version
 
