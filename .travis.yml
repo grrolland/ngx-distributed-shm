@@ -1,6 +1,9 @@
 language: java
 sudo: required
 
+git:
+  depth: false
+
 jdk:
   - openjdk8
 addons:
