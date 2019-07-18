@@ -34,7 +34,6 @@ deploy:
        name: $project_version
    - provider: script
      script: mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
-       - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
      on:
        tags: false
    - provider: script
