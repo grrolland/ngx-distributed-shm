@@ -2,6 +2,9 @@
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=alert_status)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 [![Technical debt ratio](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=sqale_index)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=coverage)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.grrolland/ngx-distributed-shm.svg)](https://search.maven.org/search?q=g:io.github.grrolland%20AND%20a:ngx-distributed-shm&core=gav)
+
+
 # ngx-distributed-shm
 
 This projet is memcached like server based on Hazelcast and Vertx. The goals of the project is to build an easy-to-use distributed memory storage with the nginx shared memory semantic for use with lua nginx plugin.
@@ -44,6 +47,16 @@ This project was succesfully used to distribute OpenID Connect Replying Party (b
  - [Vertx](http://vertx.io/) for implementing the communication protocol
  
  The dependencies above are automatically included in the distribution jar with maven shade plugin.
+ 
+ ## Download
+ 
+ You can download distribution jar directly from the github release. 
+ 
+ Alternatively, you can download the distribution jar via maven : 
+ 
+ ```
+ mvn dependency:copy -Dartifact=io.github.grrolland:ngx-distributed-shm:1.0.2:jar -DoutputDirectory=.
+ ```
  
  ## Installation
  
