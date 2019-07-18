@@ -6,7 +6,7 @@
 
     <groupId>io.github.grrolland</groupId>
     <artifactId>ngx-distributed-shm</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3-SNAPSHOT</version>
 
     <name>ngx-distributed-shm</name>
     <description>This projet is memcached like server based on Hazelcast and Vertx. The goals of the project is to build an easy-to-use distributed memory storage with the nginx shared memory semantic for use with lua nginx plugin.</description>
