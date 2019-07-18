@@ -22,26 +22,26 @@ script:
 before_deploy:
   - mvn help:evaluate -N -Dexpression=project.version|grep -v '\['
   - export project_version=$(mvn help:evaluate -N -Dexpression=project.version|grep -v '\[')
-
-deploy:
-   provider: releases
-   api_key: $GITHUB_OAUTH_TOKEN
-   file:
-     - target/ngx-distributed-shm.jar
-   skip_cleanup: true
-   overwrite: true
-   on:
-     tags: true
-     repo: grrolland/ngx-distributed-shm
-     name: $project_version
-
-before_install:
   - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 
-install:
-  - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
-  - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
+deploy:
+   - provider: releases
+     api_key: $GITHUB_OAUTH_TOKEN
+     file:
+       - target/ngx-distributed-shm.jar
+     skip_cleanup: true
+     overwrite: true
+     on:
+       tags: true
+       repo: grrolland/ngx-distributed-shm
+       name: $project_version
+   - provider: script
+     script:
+       - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
+       - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
+     on:
+       tags: false
 
 cache:
   directories:
