@@ -1,11 +1,16 @@
 language: java
 sudo: required
 
+stages:
+  - name: install
+    if: tag NOT present
+
 git:
   depth: false
 
 jdk:
   - openjdk8
+
 addons:
   sonarcloud:
     organization: grrolland-github
@@ -37,7 +42,6 @@ before_install:
 install:
   - mvn --settings .maven.xml install -DskipTests=true -Dgpg.skip -Dmaven.javadoc.skip=true -B -V
   - mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
-  if: tag NOT present
 
 cache:
   directories:
