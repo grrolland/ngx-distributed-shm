@@ -6,7 +6,7 @@
 
     <groupId>io.github.grrolland</groupId>
     <artifactId>ngx-distributed-shm</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
 
     <url>https://github.com/grrolland/ngx-distributed-shm</url>
 
