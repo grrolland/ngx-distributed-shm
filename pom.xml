@@ -50,8 +50,8 @@
 
         <sonar.sources>src/main</sonar.sources>
 
-        <sonar.junit.reportPaths>reports/java/surefire-reports</sonar.junit.reportPaths>
-        <sonar.jacoco.reportPath>reports/java/jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
     </properties>
 
@@ -168,9 +168,9 @@
                         <version>1.6.8</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverid>ossrh</serverid>
-                            <nexusurl>https://oss.sonatype.org/</nexusurl>
-                            <autoreleaseafterclose>true</autoreleaseafterclose>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
                     <plugin>
