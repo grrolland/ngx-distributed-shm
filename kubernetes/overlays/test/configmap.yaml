@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ngx-distributed-shm-conf
+  labels:
+    app: ngx-distributed-shm
+data:
+  hazelcast.yaml: |-
+      ## https://github.com/hazelcast/hazelcast/blob/master/hazelcast/src/main/resources/hazelcast-full-example.yaml
+      hazelcast:
+        cluster-name: mycluster
+        network:
+          join:
+            multicast:
+              enabled: false
+            kubernetes:
+              enabled: true
+              ## FQDN is required for discovery to work properly
+              service-dns: ngx-distributed-shm-headless.dshm.svc.cluster.local
+          memcache-protocol:
+            enabled: true
+        map:
+          default:
+            statistics-enabled: true
+            backup-count: 1
+            async-backup-count: 0
+            read-backup-data: true
+            time-to-live-seconds: 36000
+            max-idle-seconds: 1300

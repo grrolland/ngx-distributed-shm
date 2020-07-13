@@ -1,0 +1,33 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngx-distributed-shm
+  labels:
+    app: ngx-distributed-shm
+spec:
+  type: LoadBalancer
+  selector:
+    app: ngx-distributed-shm
+  ports:
+  -   name: ngx-distributed-shm-ngx
+      port: 4321
+      protocol: TCP
+      targetPort: 4321
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngx-distributed-shm-headless
+  labels:
+    app: ngx-distributed-shm
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: ngx-distributed-shm
+  ports:
+  -   name: ngx-distributed-shm-hazelcast
+      port: 5701
+      protocol: TCP
+      targetPort: 5701

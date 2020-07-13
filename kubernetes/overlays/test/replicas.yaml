@@ -1,0 +1,9 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ngx-distributed-shm
+  labels:
+    app: ngx-distributed-shm
+spec:
+    replicas: 3
