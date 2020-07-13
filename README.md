@@ -4,7 +4,6 @@
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=coverage)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.grrolland/ngx-distributed-shm.svg)](https://search.maven.org/search?q=g:io.github.grrolland%20AND%20a:ngx-distributed-shm&core=gav)
 
-
 # ngx-distributed-shm
 
 This projet is memcached like server based on Hazelcast and Vertx. The goals of the project is to build an easy-to-use distributed memory storage with the nginx shared memory semantic for use with lua nginx plugin.
@@ -17,7 +16,7 @@ Production Ready since 06/2018.
 
 ## Use cases
 
-This project was succesfully used to store rate limiting counter across a cluster of an Nginx based API Gateway in a french banking company. 
+This project was succesfully used to store rate limiting counter across a cluster of an Nginx based API Gateway in a french banking company.
 
 This project was succesfully used to distribute OpenID Connect Replying Party (based on zmartzone/lua-resty-openidc
 ) web session with the library bungle/lua-resty-session in a french banking company.
@@ -43,92 +42,94 @@ This project was succesfully used to distribute OpenID Connect Replying Party (b
 
 **ngx-distributed-shm** depends on followings libraries :
 
- - [Hazelcast IMDG](https://hazelcast.org/) for implementing the distributed storage
- - [Vertx](http://vertx.io/) for implementing the communication protocol
- 
- The dependencies above are automatically included in the distribution jar with maven shade plugin.
- 
- ## Download
- 
- You can download distribution jar directly from the github release. 
- 
- Alternatively, you can download the distribution jar via maven : 
- 
- ```
- mvn dependency:copy -Dartifact=io.github.grrolland:ngx-distributed-shm:1.0.2:jar -DoutputDirectory=.
- ```
- 
- ## Installation
- 
- You need a JVM (Java 8 at least) to run the distributed storage. 
- 
- Simply get the distribution jar and copy it on your filesystem.
- 
- ## How it works
- 
- When the storage startup, it creates an hazelcast instance and a vertx connector to communicate with it. When you start a second instance, it joins the first with the hazelcast protocol.
- 
- The protocol expose commands to interact with the distributed storage : 
-  - SET : set a value in the storage
-  - GET : get a value from the storage
-  - TOUCH : update the ttl of a key
-  - DELETE : delete a key from the sorage
-  - INCR  : increment the value for a key
- 
- In a clustered deployement (2 or more instances), a client need to connect to only one instance to see all the storage. The goal is to provide a near storage associated with an nginx instance.
- 
- ## Startup
- 
- This command startup the storage on default port (4321), with default replication options (UDP multicast) :
- 
- ```
- java -jar ngx-distributed-shm.jar
- ```
- 
- Or : 
- ``` 
- java -cp ngx-distributed-shm.jar io.github.grrolland.hcshm.Main
- ```
- 
- To startup with a configuration directory ./conf (with hazelcast.xml and logback.xml) use :
- 
- ``` 
- java -cp ngx-distributed-shm.jar:./conf io.github.grrolland.hcshm.Main
- ```
- 
- The dist/bin directroy contains startup and shutdown scripts.
- 
- ## Startup Options
- 
- ***-Dngx-distributed-shm.port=port***
- **default :** *4321* 
- 
- Startup the storage and bind the protocol port on <port>. 
- 
- This command startup the storage on the port 40000 and the 127.0.0.1 address : 
- 
+- [Hazelcast IMDG](https://hazelcast.org/) for implementing the distributed storage
+- [Vertx](http://vertx.io/) for implementing the communication protocol
+
+The dependencies above are automatically included in the distribution jar with maven shade plugin.
+
+## Download
+
+You can download distribution jar directly from the github release.
+
+Alternatively, you can download the distribution jar via maven :
+
+```
+mvn dependency:copy -Dartifact=io.github.grrolland:ngx-distributed-shm:1.0.2:jar -DoutputDirectory=.
+```
+
+## Installation
+
+You need a JVM (Java 8 at least) to run the distributed storage.
+
+Simply get the distribution jar and copy it on your filesystem.
+
+## How it works
+
+When the storage startup, it creates an hazelcast instance and a vertx connector to communicate with it. When you start a second instance, it joins the first with the hazelcast protocol.
+
+The protocol expose commands to interact with the distributed storage :
+
+- SET : set a value in the storage
+- GET : get a value from the storage
+- TOUCH : update the ttl of a key
+- DELETE : delete a key from the sorage
+- INCR : increment the value for a key
+
+In a clustered deployement (2 or more instances), a client need to connect to only one instance to see all the storage. The goal is to provide a near storage associated with an nginx instance.
+
+## Startup
+
+This command startup the storage on default port (4321), with default replication options (UDP multicast) :
+
+```
+java -jar ngx-distributed-shm.jar
+```
+
+Or :
+
+```
+java -cp ngx-distributed-shm.jar io.github.grrolland.hcshm.Main
+```
+
+To startup with a configuration directory ./conf (with hazelcast.xml and logback.xml) use :
+
+```
+java -cp ngx-distributed-shm.jar:./conf io.github.grrolland.hcshm.Main
+```
+
+The dist/bin directroy contains startup and shutdown scripts.
+
+## Startup Options
+
+**_-Dngx-distributed-shm.port=port_**
+**default :** _4321_
+
+Startup the storage and bind the protocol port on \<port\>.
+
+This command startup the storage on the port 40000 and the 127.0.0.1 address :
+
 ```
   java -Dngx-distributed-shm.port=40000 -jar ngx-distributed-shm.jar
 ```
- 
-***-Dngx-distributed-shm.bind_address=address***
-**default :** *127.0.0.1*
 
-Startup the storage and bind the protocol on address <address>.
- 
- This command startup the storage on the 192.168.0.1 address : 
- 
+**_-Dngx-distributed-shm.bind_address=address_**
+**default :** _127.0.0.1_
+
+Startup the storage and bind the protocol on address \<address\>.
+
+This command startup the storage on the 192.168.0.1 address :
+
 ```
   java -Dngx-distributed-shm.bind_address=192.168.0.1 -jar ngx-distributed-shm.jar
 ```
 
-### Configure the hazelcast IMDG map for replication 
+### Configure the hazelcast IMDG map for replication
 
 The hazelcast IMDG is configured with a configuration file which must be present in the classpath. The file must be named hazelcast.xml.
 
 This is an example of this file :
 
-```
+```xml
 <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.9.xsd"
            xmlns="http://www.hazelcast.com/schema/config"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -166,15 +167,15 @@ This is an example of this file :
 </hazelcast>
 ```
 
-The reference documentation for this configuration is here : https://docs.hazelcast.org/docs/3.12.1/manual/html-single/index.html#tcp-ip-element
+The reference documentation for this configuration is here : <https://docs.hazelcast.org/docs/3.12.1/manual/html-single/index.html#tcp-ip-element>
 
 This configuration works well for a two menber cluster of the distributed shared memory.
 
 ## Logging
 
-The dist/conf directory contains an exemple logback.xml which control logging. The example file is the following : 
+The dist/conf directory contains an exemple logback.xml which control logging. The example file is the following :
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
@@ -204,9 +205,8 @@ The dist/conf directory contains an exemple logback.xml which control logging. T
 </configuration>
 ```
 
-Starting the dshm with the ***-Dngx-distributed-shm.log_dir=log_dir*** permit to choose the logging directory.
+Starting the dshm with the **_-Dngx-distributed-shm.log_dir=log_dir_** permit to choose the logging directory.
 
-  
 ## Protocol
 
 The protocol is a test protocol inspired by the memcached protocol.
@@ -221,19 +221,19 @@ The command line part has the following format :
 COMMAND ARG1 ARG2 ARGN\r\n
 ```
 
-The ***ARG1*** is alway the ***key***
+The **_ARG1_** is alway the **_key_**
 
 ### Anatomy of a key : region cache support
 
 The distributed shared memory support region partionning. The format of the key control the region where will be located the value.
 
-This key ***key1*** will be located in the region ***region1*** : 
+This key **_key1_** will be located in the region **_region1_** :
 
 ```
 region1::key1
 ```
 
-This key ***key1*** will be located in the default region  : 
+This key **_key1_** will be located in the default region :
 
 ```
 key1
@@ -245,18 +245,18 @@ This permit to control the hazelast map where will be stored the key/value.
 
 The data part is a bytes stream wich the length is specified in the command part.
 
-For exemple the second argument of the SET command set the length of the data to send : 
+For exemple the second argument of the SET command set the length of the data to send :
 
 ```
 SET key 0 4\r\n
 1234
-``` 
+```
 
 This command set the key "key" at the value "1234"
 
 ### Response
 
-The response protocol is fairly simple. When the the command is executed the response have the folowing format : 
+The response protocol is fairly simple. When the the command is executed the response have the folowing format :
 
 ```
 \r\nRESPONSE response_arg\r\n
@@ -264,51 +264,52 @@ The response protocol is fairly simple. When the the command is executed the res
 
 The following terms are used in the response :
 
-***DONE*** 
+**_DONE_**
 
 The command is successfully executed. There is no argument.
 
-***ERROR*** 
+**_ERROR_**
 
 There is an error in the command. the argument is the error message.
 
 ### Error Messages
-***malformed_request***
+
+**_malformed_request_**
 
 The command request is malformed. There is an error in the request.
- 
-***not_found***
 
-The key involved in the command is not found. 
+**_not_found_**
+
+The key involved in the command is not found.
 
 ### Commands
 
-***GET \<key\>***
+**_GET \<key\>_**
 
-**with data:** *no* 
+**with data:** _no_
 
 Get the value of the key in the storage. This operation is atomic.
- 
+
 ```
 GET key\r\n
 ```
 
-***SET \<key\> \<expiration\> \<length\>***
+**_SET \<key\> \<expiration\> \<length\>_**
 
-**with data:** *yes*
+**with data:** _yes_
 
 Set a value of length \<length\> for the key \<key\> in the storage with the expiration time in second \<expiration\>. This operation is atomic.
 
 When \<expiration\> is 0, the key don't expire.
- 
+
 ```
 SET key 10 4\r\n
 1234
 ```
 
-***TOUCH \<key\> \<expiration\>***
+**_TOUCH \<key\> \<expiration\>_**
 
-**with data:** *no*
+**with data:** _no_
 
 Set the expiration time in second \<expiration\> for the key \<key\>. This operation is atomic.
 
@@ -319,39 +320,39 @@ When the key does not exist the command does nothing.
 TOUCH key 10\r\n
 ```
 
-***DELETE \<key\>***
+**_DELETE \<key\>_**
 
-**with data:** *no*
+**with data:** _no_
 
 Delete the key \<key\> from the storage. This operation is atomic.
 When the key does not exist the command does nothing.
- 
+
 ```
 DELETE key\r\n
 ```
 
-***INCR \<key\> \<value\> \<init\>***
+**_INCR \<key\> \<value\> \<init\>_**
 
-**with data:** *no*
+**with data:** _no_
 
 Increment the value of the key \<key\> with \<value\> if the key exists and represent an integer.
 
 If the value is not an integer, this operation has no effect.
 
-If the key don't exist or is expired, this operation create the key and init the value to  \<value\>+\<init\>.
- 
+If the key don't exist or is expired, this operation create the key and init the value to \<value\>+\<init\>.
+
 This operation is atomic.
 
 ```
 INCR key -1 0\r\n
 ```
 
-***FLUSHALL [region]***
+**_FLUSHALL [region]_**
 
-**with data:** *no*
+**with data:** _no_
 
 Remove all the key from the region. The region is optionnal. Without region parameter, the default region is flush.
- 
+
 This operation is atomic.
 
 ```
@@ -364,9 +365,9 @@ Or :
 FLUSHALL region1\r\n
 ```
 
-***QUIT***
+**_QUIT_**
 
-**with data:** *no*
+**with data:** _no_
 
 Close the connection with the server.
 
@@ -380,7 +381,7 @@ The lua libraries (lua/dshm.lua) is used to pilot the shared memory. The librari
 
 This is an exemple to use it :
 
-```
+```lua
 local dshm = require "resty.dshm"
 
 local store = dshm:new()
@@ -395,11 +396,11 @@ store:delete("key")
 
 ### Resty Session support
 
-This module could be used to activate session replication with the excellent lua library Resty Session (https://github.com/bungle/lua-resty-session)
+This module could be used to activate session replication with the excellent lua library Resty Session (<https://github.com/bungle/lua-resty-session>)
 
-To use it, copy the lua extention in your resty/session/storage directory and use this type of configuration in your nginx.conf : 
+To use it, copy the lua extention in your resty/session/storage directory and use this type of configuration in your nginx.conf :
 
-```
+```nginx
 set $session_storage           dshm;
 set $session_serializer        json;
 set $session_encoder           base64;
@@ -411,5 +412,43 @@ set $session_secret a_secret_string;
 
 The session_storage parameter control the storage module to be used.
 
+## Docker
 
+- A Docker image can be built using the provided [Dockerfile](./Dockerfile):
 
+  ```bash
+  docker build \
+    --force-rm \
+    --squash \
+    -t 'local/docker-ngx-distributed-shm' \
+    .
+  ```
+
+- Run a container:
+
+  ```bash
+  docker run --rm -it \
+    -u root \
+    --name docker-ngx-distributed-shm \
+    'local/docker-ngx-distributed-shm'
+  ```
+
+## Kubernetes
+
+1. See [kubernetes](./kubernetes) directory for sample artefacts.
+2. Use [kustomize](https://github.com/kubernetes-sigs/kustomize) standalone or the one embedded in `kubectl` to generate kubernetes artefacts for a specific release:
+
+   - Change files in `kubernetes/overlays/test/` according to your needs
+     - `configmap.yaml` contains a basic hazelcast configuration as yaml instead of xml for ease of reading
+   - Generate artefacts and inspect:
+
+     ```bash
+     cd kubernetes
+     kubectl kustomize /overlays/test > kubernetes.yaml
+     ```
+
+   - Apply: `kubectl apply -f kubernetes.yaml`
+
+## Management Center
+
+- Optionally, the Hazelcast cluster can be monitored via [Management Center](https://docs.hazelcast.org/docs/management-center/latest/manual/html/index.html)
