@@ -401,13 +401,18 @@ This module could be used to activate session replication with the excellent lua
 To use it, copy the lua extention in your resty/session/storage directory and use this type of configuration in your nginx.conf :
 
 ```nginx
-set $session_storage           dshm;
-set $session_serializer        json;
-set $session_encoder           base64;
-set $session_cookie_persistent off;
-set $session_cookie_renew      600;
-set $session_cookie_samesite   Lax;
-set $session_secret a_secret_string;
+set $session_storage               dshm;
+set $session_dshm_region           sessions;
+set $session_dshm_connect_timeout  1000; # (in milliseconds)
+set $session_dshm_send_timeout     1000; # (in milliseconds)
+set $session_dshm_read_timeout     1000; # (in milliseconds)
+set $session_dshm_host             127.0.0.1;
+set $session_dshm_port             4321;
+set $session_dshm_pool_name        sessions;
+set $session_dshm_pool_timeout     1000; # (in milliseconds)
+set $session_dshm_pool_size        10;
+set $session_dshm_pool_backlog     10;
+set $session_secret                base64_encoded_string;
 ```
 
 The session_storage parameter control the storage module to be used.
