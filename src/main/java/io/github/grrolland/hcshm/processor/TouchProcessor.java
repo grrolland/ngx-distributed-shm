@@ -20,7 +20,7 @@ package io.github.grrolland.hcshm.processor;
 import io.github.grrolland.hcshm.HazelcastInstanceHandler;
 import io.github.grrolland.hcshm.ShmRegionLocator;
 import io.github.grrolland.hcshm.ShmValue;
-import com.hazelcast.map.EntryBackupProcessor;
+//import com.hazelcast.map.EntryBackupProcessor;
 import com.hazelcast.map.EntryProcessor;
 
 import java.io.Serializable;
@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Entry processor for the touch command
  */
-public class TouchProcessor implements EntryProcessor<String, ShmValue>, Serializable {
+public class TouchProcessor implements EntryProcessor<String, ShmValue, Object>, Serializable {
     /**
      * Touch expiration
      */
@@ -70,8 +70,8 @@ public class TouchProcessor implements EntryProcessor<String, ShmValue>, Seriali
      * The backup processor
      * @return null, because set is called in the main process
      */
-    @Override
-    public EntryBackupProcessor<String, ShmValue> getBackupProcessor() {
-        return null;
-    }
+    // @Override
+    // public EntryBackupProcessor<String, ShmValue> getBackupProcessor() {
+    //     return null;
+    // }
 }

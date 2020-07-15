@@ -1,0 +1,42 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ngx-distributed-shm
+  labels:
+    app: ngx-distributed-shm
+spec:
+  replicas: 1
+  serviceName: ngx-distributed-shm-headless
+  selector:
+    matchLabels:
+      app: ngx-distributed-shm
+  template:
+    metadata:
+      labels:
+        app: ngx-distributed-shm
+    spec:
+      serviceName: ngx-distributed-shm-headless
+      containers:
+      - name: ngx-distributed-shm
+        image: grrolland/ngx-distributed-shm:latest
+        imagePullPolicy: Always
+        args:
+        - -Dngx-distributed-shm.bind_address=0.0.0.0
+        - -cp
+        - /ngx-distributed-shm.jar:/conf
+        - io.github.grrolland.hcshm.Main
+        command:
+        - java
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: ngx-distributed-shm-conf
+          mountPath: /conf
+      volumes:
+      - name: ngx-distributed-shm-conf
+        configMap:
+            name: ngx-distributed-shm-conf

@@ -20,8 +20,8 @@ package io.github.grrolland.hcshm.processor;
 import io.github.grrolland.hcshm.HazelcastInstanceHandler;
 import io.github.grrolland.hcshm.ShmRegionLocator;
 import io.github.grrolland.hcshm.ShmValue;
-import com.hazelcast.core.IMap;
-import com.hazelcast.map.EntryBackupProcessor;
+import com.hazelcast.map.IMap;
+//import com.hazelcast.map.EntryBackupProcessor;
 import com.hazelcast.map.EntryProcessor;
 
 import java.io.Serializable;
@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Entry Processor for the Incr command
  */
-public class IncrProcessor implements EntryProcessor<String, ShmValue>, Serializable {
+public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, Serializable {
     /**
      * Incrementation value
      */
@@ -95,8 +95,8 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue>, Serializ
      * The backup processor
      * @return null, because set or remove is called in the main process
      */
-    @Override
-    public EntryBackupProcessor<String, ShmValue> getBackupProcessor() {
-        return null;
-    }
+    // @Override
+    // public EntryBackupProcessor<String, ShmValue> getBackupProcessor() {
+    //     return null;
+    // }
 }

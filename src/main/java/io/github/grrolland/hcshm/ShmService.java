@@ -22,7 +22,7 @@ package io.github.grrolland.hcshm;
 import io.github.grrolland.hcshm.processor.IncrProcessor;
 import io.github.grrolland.hcshm.processor.TouchProcessor;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
+import com.hazelcast.map.IMap;
 
 import java.util.concurrent.TimeUnit;
 
