@@ -48,10 +48,10 @@
     </developers>
 
     <properties>
-        <vertx.version>3.6.3</vertx.version>
-        <hazelcast.version>4.0.2</hazelcast.version>
-        <hazelcast-kubernetes-version>2.0.1</hazelcast-kubernetes-version>
-        <slf4j.version>1.7.25</slf4j.version>
+        <vertx.version>4.1.5</vertx.version>
+        <hazelcast.version>5.0</hazelcast.version>
+        <hazelcast-kubernetes-version>2.2.3</hazelcast-kubernetes-version>
+        <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.0</logback.version>
         <junit.version>4.13.1</junit.version>
         <sonar.sources>src/main</sonar.sources>

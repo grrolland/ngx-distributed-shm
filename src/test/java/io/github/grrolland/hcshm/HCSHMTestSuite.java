@@ -19,6 +19,7 @@ package io.github.grrolland.hcshm;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -40,6 +41,8 @@ import org.slf4j.LoggerFactory;
 })
 public class HCSHMTestSuite {
 
+    private static final Thread SHM_THREAD = new Thread(() -> Main.main(new String[] {}));;
+
     /**
      * Init the test case : launch the distributed memory
      */
@@ -52,10 +55,15 @@ public class HCSHMTestSuite {
 
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(Level.INFO);
-
-        Main.main(new String[] {});
+        SHM_THREAD.start();
         Thread.sleep(10000); // NOSONAR
 
+    }
+
+    @AfterClass
+    public static void shutdown() throws InterruptedException {
+        SHM_THREAD.interrupt();
+        SHM_THREAD.join();
     }
 
 }

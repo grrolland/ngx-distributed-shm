@@ -38,7 +38,7 @@ public class QuitTestCase extends  AbstractHCSHMGetTestCase {
             getWriter().write("QUIT\r\n");
             getWriter().flush();
             String res = getReader().readLine();
-            Assert.assertNull(res);
+            Assert.assertEquals("DONE", res);
 
         }
         catch (IOException e)
