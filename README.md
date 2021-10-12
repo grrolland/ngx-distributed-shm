@@ -1,9 +1,8 @@
-[![Build Status](https://travis-ci.org/grrolland/ngx-distributed-shm.svg?branch=master)](https://travis-ci.org/grrolland/ngx-distributed-shm)
+[![Build Status](https://travis-ci.com/grrolland/ngx-distributed-shm.svg?branch=master)](https://travis-ci.org/grrolland/ngx-distributed-shm)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=alert_status)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 [![Technical debt ratio](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=sqale_index)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=coverage)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.grrolland/ngx-distributed-shm.svg)](https://search.maven.org/search?q=g:io.github.grrolland%20AND%20a:ngx-distributed-shm&core=gav)
-[![Docker Repository on Quay](https://quay.io/repository/grrolland/ngx-distributed-shm/status "Docker Repository on Quay")](https://quay.io/repository/grrolland/ngx-distributed-shm)
 
 # ngx-distributed-shm
 
