@@ -29,6 +29,7 @@ public class ShmRegionLocator implements Serializable {
     /**
      * Get the map form the key name
      * @param key the key
+     * @param hazelcast hazelcast instance
      * @return return the named IMap, if no region in the key return the default IMap
      */
     public IMap<String, ShmValue> getMap(final HazelcastInstance hazelcast, final String key) {
@@ -38,6 +39,7 @@ public class ShmRegionLocator implements Serializable {
     /**
      * Get the map form the region name
      * @param region the key
+     * @param hazelcast hazelcast instance
      * @return return the named IMap, if no region return the default IMap
      */
     public IMap<String, ShmValue> getMapRegion(final HazelcastInstance hazelcast, final String region) {

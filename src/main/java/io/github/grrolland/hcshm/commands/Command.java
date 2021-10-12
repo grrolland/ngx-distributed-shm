@@ -80,7 +80,6 @@ public abstract class Command {
      * Execute the command
      * @param comandTokens the protocol tokens argument of the command
      * @return the result of the command 'protocol encoded'
-     * @throws ProtocolException protocol exception
      */
     public abstract String execute(String[] comandTokens);
 
@@ -88,13 +87,9 @@ public abstract class Command {
      * Execute the command
      * @param buffer the data buffer
      * @return the result of the command 'protocol encoded'
-     * @throws ProtocolException protocol exception
      */
     public String executeDataPart(String buffer) {
-        final StringBuilder response = new StringBuilder();
-        response.append(ERROR_UNEXPECTED_DATA);
-        response.append(RESPONSE_LINE_DELIMITER);
-        return response.toString();
+        return ERROR_UNEXPECTED_DATA + RESPONSE_LINE_DELIMITER;
     }
 
     /**
@@ -150,7 +145,6 @@ public abstract class Command {
      * Get the key from command token
      * @param commandToken the command token
      * @return the key
-     * @throws ProtocolException if unable to get the key from command token
      */
     protected String getKey(String commandToken) {
         return commandToken;
@@ -186,7 +180,7 @@ public abstract class Command {
     protected int getIncrValue(String commandToken) throws ProtocolException {
         try
         {
-            return Integer.valueOf(commandToken);
+            return Integer.parseInt(commandToken);
         }
         catch(NumberFormatException e)
         {
@@ -222,7 +216,7 @@ public abstract class Command {
      */
     protected void writeLen(StringBuilder response, String value) {
         response.append(LEN);
-        response.append(Integer.toString(value.length()));
+        response.append(value.length());
         response.append(RESPONSE_LINE_DELIMITER);
     }
     /**
