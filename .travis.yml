@@ -7,6 +7,9 @@ git:
 jdk:
   - openjdk8
 
+services:
+  - docker
+
 addons:
   sonarcloud:
     organization: grrolland-github
@@ -46,6 +49,9 @@ deploy:
      script: mvn clean deploy --settings .maven.xml -DskipTests=true -B -U -Prelease
      on:
        tags: false
+
+after_success:
+  - bash ../.travis/pushimage.sh
 
 cache:
   directories:

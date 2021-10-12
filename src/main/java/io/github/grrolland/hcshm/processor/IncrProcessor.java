@@ -21,7 +21,6 @@ import io.github.grrolland.hcshm.HazelcastInstanceHandler;
 import io.github.grrolland.hcshm.ShmRegionLocator;
 import io.github.grrolland.hcshm.ShmValue;
 import com.hazelcast.map.IMap;
-//import com.hazelcast.map.EntryBackupProcessor;
 import com.hazelcast.map.EntryProcessor;
 
 import java.io.Serializable;
@@ -78,7 +77,7 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
         }
         else
         {
-            newval = Long.toString(value + (long) init);
+            newval = Long.toString(value + init);
         }
         IMap<String, ShmValue> map = regionLocator.getMap(HazelcastInstanceHandler.getInstance(), entry.getKey());
         if (expire >= 0) {
@@ -90,13 +89,4 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
         }
         return newval;
     }
-
-    /**
-     * The backup processor
-     * @return null, because set or remove is called in the main process
-     */
-    // @Override
-    // public EntryBackupProcessor<String, ShmValue> getBackupProcessor() {
-    //     return null;
-    // }
 }
