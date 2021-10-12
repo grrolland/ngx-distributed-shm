@@ -25,7 +25,7 @@ before_deploy:
 
 deploy:
    - provider: releases
-     token: $GITHUB_OAUTH_TOKEN
+     api_key: $GITHUB_OAUTH_TOKEN
      file:
        - target/ngx-distributed-shm.jar
      overwrite: true
