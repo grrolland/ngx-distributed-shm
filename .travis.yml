@@ -1,5 +1,6 @@
 language: java
-sudo: required
+os: linux
+dist: xenial
 
 git:
   depth: false
@@ -15,7 +16,7 @@ addons:
     organization: grrolland-github
 
 script:
-  - mvn clean package -DskipTests
+  - mvn clean package
   - sh ./runSonarQubeAnalysis.sh
 
 before_deploy:
@@ -24,10 +25,9 @@ before_deploy:
 
 deploy:
    - provider: releases
-     api_key: $GITHUB_OAUTH_TOKEN
+     token: $GITHUB_OAUTH_TOKEN
      file:
        - target/ngx-distributed-shm.jar
-     skip_cleanup: true
      overwrite: true
      on:
        tags: true
