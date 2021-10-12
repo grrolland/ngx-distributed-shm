@@ -94,7 +94,6 @@ public class SetCommand extends Command {
      * Execute the command
      * @param buffer the data buffer
      * @return the result of the command 'protocol encoded'
-     * @throws ProtocolException protocol exception
      */
     @Override
     public String executeDataPart(String buffer) {
@@ -102,7 +101,7 @@ public class SetCommand extends Command {
         String value;
         try
         {
-            value = getService().set(key, Long.valueOf(buffer), expire);
+            value = getService().set(key, Long.parseLong(buffer), expire);
         }
         catch (NumberFormatException e)
         {
