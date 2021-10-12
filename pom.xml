@@ -79,11 +79,6 @@
             <version>${hazelcast.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-kubernetes</artifactId>
-            <version>${hazelcast-kubernetes-version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
