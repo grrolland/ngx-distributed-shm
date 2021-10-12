@@ -51,7 +51,7 @@ deploy:
        tags: false
 
 after_success:
-  - bash ../.travis/pushimage.sh
+  - bash .travis/pushimage.sh
 
 cache:
   directories:
