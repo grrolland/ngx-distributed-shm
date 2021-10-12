@@ -48,10 +48,12 @@
     </developers>
 
     <properties>
-        <vertx.version>3.6.3</vertx.version>
-        <hazelcast.version>4.0.2</hazelcast.version>
-        <hazelcast-kubernetes-version>2.0.1</hazelcast-kubernetes-version>
-
+        <vertx.version>4.1.5</vertx.version>
+        <hazelcast.version>5.0</hazelcast.version>
+        <hazelcast-kubernetes-version>2.2.3</hazelcast-kubernetes-version>
+        <slf4j.version>1.7.32</slf4j.version>
+        <logback.version>1.2.0</logback.version>
+        <junit.version>4.13.1</junit.version>
         <sonar.sources>src/main</sonar.sources>
 
         <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
@@ -77,39 +79,34 @@
             <version>${hazelcast.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.hazelcast</groupId>
-            <artifactId>hazelcast-kubernetes</artifactId>
-            <version>${hazelcast-kubernetes-version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.7.25</version>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.25</version>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.1.11</version>
+            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.11</version>
+            <version>${logback.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

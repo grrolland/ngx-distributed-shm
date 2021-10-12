@@ -36,7 +36,7 @@ public class Configuration {
     /**
      * Default workers
      */
-    public static final int DEFAULT_WORKERS = 4;
+    public static final int DEFAULT_WORKERS = 1;
 
     /**
      * Private default constructor

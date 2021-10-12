@@ -30,7 +30,7 @@ import java.net.Socket;
 /**
  * Global Protocol Test Case
  */
-public class AbstractHCSHMGetTestCase {
+public abstract class AbstractHCSHMGetTestCase {
 
     /**
      * Test Socket
