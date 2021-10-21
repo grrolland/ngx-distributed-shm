@@ -1,34 +1,130 @@
-# This workflow will build a package using Maven and then publish it to GitHub packages when a release is created
-# For more information see: https://github.com/actions/setup-java/blob/main/docs/advanced-usage.md#apache-maven-with-a-settings-path
-
-name: Maven Package
+name: Create Release
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - 'release-*'
+
+env:
+  REGISTRY: ghcr.io
+  ALTERNATE_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  IMAGE_NAME: ${{ github.repository }}
+  SONAR_URL: https://sonarcloud.io
+  SONAR_ORG: grrolland-github
 
 jobs:
-  build:
-
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
+      - name: Get tag name
+        id: get_tag_name
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/heads\/release-/}
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+        ##
+        # Perform Maven Release
+        #
+      - uses: actions/checkout@v2
+        with:
+          ref: master
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+          cache: maven
+      - name: Configure Git user
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+      - name: Perform Release
+        run: mvn -B -Dtag=${GITHUB_REF##*release-} release:prepare release:perform
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Publish to GitHub Packages Apache Maven
-      run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+      ##
+      #  Checkout and Build the Tag
+      #
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.get_tag_name.outputs.VERSION }}
+
+      - name: Build Tag
+        run: |
+          mvn clean \
+            org.jacoco:jacoco-maven-plugin:prepare-agent \
+            package \
+            org.jacoco:jacoco-maven-plugin:report \
+            sonar:sonar \
+            -B -e -V \
+          	-Dsonar.host.url=$SONAR_URL \
+          	-Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.organization=$SONAR_ORG \
+            -Dsonar.sources=src/main \
+            -Dsonar.junit.reportPaths=target/surefire-reports \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      ##
+      #  Publish to Github Docker Registry
+      #
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            ${{ steps.get_tag_name.outputs.VERSION }}
+            latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      ##
+      #  Publish to Alternate Docker Registry
+      #
+      - name: Log in to the Container registry
+        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        with:
+          registry: ${{ env.ALTERNATE_REGISTRY }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta_alt
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.ALTERNATE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            ${{ steps.get_tag_name.outputs.VERSION }}
+            latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta_alt.outputs.tags }}
+          labels: ${{ steps.meta_alt.outputs.labels }}
+
+      ##
+      #  Create a Github Release
+      #
+      - uses: ncipollo/release-action@v1
+        with:
+          body: Release version ${{ steps.get_tag_name.outputs.VERSION }}
+          tag: ${{ steps.get_tag_name.outputs.VERSION }}
+          token: ${{ secrets.GITHUB_TOKEN }}

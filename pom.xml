@@ -29,13 +29,10 @@
     </scm>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>github</id>
+            <name>GitHub Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/grrolland/ngx-distributed-shm</url>
         </repository>
     </distributionManagement>
 
@@ -52,13 +49,8 @@
         <hazelcast.version>5.0</hazelcast.version>
         <hazelcast-kubernetes-version>2.2.3</hazelcast-kubernetes-version>
         <slf4j.version>1.7.32</slf4j.version>
-        <logback.version>1.2.0</logback.version>
-        <junit.version>4.13.1</junit.version>
-        <sonar.sources>src/main</sonar.sources>
-
-        <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
-        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-
+        <logback.version>1.2.6</logback.version>
+        <junit.version>4.13.2</junit.version>
     </properties>
 
 
