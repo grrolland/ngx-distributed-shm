@@ -24,7 +24,7 @@
 
     <scm>
         <connection>scm:git:git@github.com:grrolland/ngx-distributed-shm.git</connection>
-        <developerConnection>scm:git:git@github.com:grrolland/ngx-distributed-shm.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/grrolland/ngx-distributed-shm.git</developerConnection>
         <url>https://github.com/grrolland/ngx-distributed-shm</url>
     </scm>
 
