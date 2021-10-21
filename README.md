@@ -438,10 +438,13 @@ The session_storage parameter control the storage module to be used.
     'local/docker-ngx-distributed-shm'
   ```
 
-- An official docker image build is available at quay.io :
+- An official docker image build is available at quay.io or directly in the github registry :
 
     ```shell
     docker pull quay.io/grrolland/ngx-distributed-shm    
+    ```
+    ```shell
+    docker pull ghcr.io/grrolland/ngx-distributed-shm    
     ```
 ## Kubernetes
 
