@@ -17,9 +17,9 @@ Production Ready since 06/2018.
 
 ## Use cases
 
-This project was succesfully used to store rate limiting counter across a cluster of an Nginx based API Gateway in a french banking company.
+This project was successfully used to store rate limiting counter across a cluster of a Nginx based API Gateway in a French banking company.
 
-This project was succesfully used to distribute OpenID Connect Replying Party (based on zmartzone/lua-resty-openidc
+This project was successfully used to distribute OpenID Connect Replying Party (based on zmartzone/lua-resty-openidc
 ) web session with the library bungle/lua-resty-session in a french banking company.
 
 ## Principle Schema
@@ -50,7 +50,7 @@ The dependencies above are automatically included in the distribution jar with m
 
 ## Download
 
-You can download distribution jar directly from the github release.
+You can download distribution jar directly from the GitHub release.
 
 Alternatively, you can download the distribution jar via maven :
 
@@ -73,10 +73,10 @@ The protocol expose commands to interact with the distributed storage :
 - SET : set a value in the storage
 - GET : get a value from the storage
 - TOUCH : update the ttl of a key
-- DELETE : delete a key from the sorage
+- DELETE : delete a key from the storage
 - INCR : increment the value for a key
 
-In a clustered deployement (2 or more instances), a client need to connect to only one instance to see all the storage. The goal is to provide a near storage associated with an nginx instance.
+In a clustered deployment (2 or more instances), a client need to connect to only one instance to see all the storage. The goal is to provide a near storage associated with a nginx instance.
 
 ## Startup
 
@@ -98,7 +98,7 @@ To startup with a configuration directory ./conf (with hazelcast.xml and logback
 java -cp ngx-distributed-shm.jar:./conf io.github.grrolland.hcshm.Main
 ```
 
-The dist/bin directroy contains startup and shutdown scripts.
+The dist/bin directory contains startup and shutdown scripts.
 
 ## Startup Options
 
@@ -170,11 +170,11 @@ This is an example of this file :
 
 The reference documentation for this configuration is here : <https://docs.hazelcast.org/docs/3.12.1/manual/html-single/index.html#tcp-ip-element>
 
-This configuration works well for a two menber cluster of the distributed shared memory.
+This configuration works well for a two member cluster of the distributed shared memory.
 
 ## Logging
 
-The dist/conf directory contains an exemple logback.xml which control logging. The example file is the following :
+The dist/conf directory contains an example logback.xml which control logging. The example file is the following :
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -226,7 +226,7 @@ The **_ARG1_** is alway the **_key_**
 
 ### Anatomy of a key : region cache support
 
-The distributed shared memory support region partionning. The format of the key control the region where will be located the value.
+The distributed shared memory support region partitioning. The format of the key control the region where will be located the value.
 
 This key **_key1_** will be located in the region **_region1_** :
 
@@ -240,13 +240,13 @@ This key **_key1_** will be located in the default region :
 key1
 ```
 
-This permit to control the hazelast map where will be stored the key/value.
+This permit to control the hazelcast map where will be stored the key/value.
 
 ### Data part
 
-The data part is a bytes stream wich the length is specified in the command part.
+The data part is a bytes stream which the length is specified in the command part.
 
-For exemple the second argument of the SET command set the length of the data to send :
+For example the second argument of the SET command set the length of the data to send :
 
 ```
 SET key 0 4\r\n
@@ -257,7 +257,7 @@ This command set the key "key" at the value "1234"
 
 ### Response
 
-The response protocol is fairly simple. When the the command is executed the response have the folowing format :
+The response protocol is fairly simple. When the command is executed the response have the following format :
 
 ```
 \r\nRESPONSE response_arg\r\n
@@ -352,7 +352,7 @@ INCR key -1 0\r\n
 
 **with data:** _no_
 
-Remove all the key from the region. The region is optionnal. Without region parameter, the default region is flush.
+Remove all the key from the region. The region is optional. Without region parameter, the default region is flush.
 
 This operation is atomic.
 
@@ -378,7 +378,7 @@ QUIT\r\n
 
 ## LUA libraries support
 
-The lua libraries (lua/dshm.lua) is used to pilot the shared memory. The librarie should be installed in the resty disrectory of the openresty distribution.
+The lua libraries (lua/dshm.lua) is used to pilot the shared memory. The library should be installed in the resty directory of the openresty distribution.
 
 This is an exemple to use it :
 
@@ -399,7 +399,7 @@ store:delete("key")
 
 This module could be used to activate session replication with the excellent lua library Resty Session (<https://github.com/bungle/lua-resty-session>)
 
-To use it, copy the lua extention in your resty/session/storage directory and use this type of configuration in your nginx.conf :
+To use it, copy the lua extension in your resty/session/storage directory and use this type of configuration in your nginx.conf :
 
 ```nginx
 set $session_storage               dshm;
@@ -439,7 +439,7 @@ The session_storage parameter control the storage module to be used.
     'local/docker-ngx-distributed-shm'
   ```
 
-- An official docker image build is available at quay.io or directly in the github registry :
+- An official docker image build is available at quay.io or directly in the GitHub registry :
 
     ```shell
     docker pull quay.io/grrolland/ngx-distributed-shm    
