@@ -8,8 +8,6 @@ ENV NGX_DISTRIBUTED_SHM_PORT=4321 \
 
 COPY target/ngx-distributed-shm.jar /
 
-STOPSIGNAL SIGRTMIN+3
-
 EXPOSE 4321
 
 ENTRYPOINT java -Dhazelcast.shutdownhook.policy=GRACEFUL \
