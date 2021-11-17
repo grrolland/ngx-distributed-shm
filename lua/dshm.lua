@@ -234,7 +234,6 @@ function _M.set(self, key, value, exptime)
 
     local req = "set " .. self.escape_key(key) .. " "
             .. exptime .. " " .. strlen(value) .. "\r\n" .. value
-            .. "\r\n"
 
     local bytes, err = sock:send(req)
     if not bytes then
