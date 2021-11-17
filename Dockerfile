@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM eclipse-temurin:11-alpine
 
 LABEL maintainer="Grégoire Rolland <gregoire.rolland@live.fr>"
 
