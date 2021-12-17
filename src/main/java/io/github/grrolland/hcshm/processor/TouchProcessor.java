@@ -20,7 +20,6 @@ package io.github.grrolland.hcshm.processor;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-//import com.hazelcast.map.EntryBackupProcessor;
 import com.hazelcast.map.EntryProcessor;
 import com.hazelcast.map.ExtendedMapEntry;
 
@@ -58,5 +57,4 @@ public class TouchProcessor implements EntryProcessor<String, ShmValue, Object> 
         }
         return null;
     }
-
 }

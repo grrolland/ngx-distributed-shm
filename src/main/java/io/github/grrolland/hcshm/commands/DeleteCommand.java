@@ -37,7 +37,6 @@ public class DeleteCommand extends Command {
      * Execute the command
      * @param commandTokens the protocol tokens argument of the command
      * @return the result of the command 'protocol encoded'
-     * @throws ProtocolException protocol exception
      */
     public String execute(String[] commandTokens) {
         final StringBuilder response = new StringBuilder();
