@@ -17,28 +17,23 @@
  */
 package io.github.grrolland.hcshm.processor;
 
-import io.github.grrolland.hcshm.HazelcastInstanceHandler;
-import io.github.grrolland.hcshm.ShmRegionLocator;
-import io.github.grrolland.hcshm.ShmValue;
-import com.hazelcast.map.EntryProcessor;
-
-import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import com.hazelcast.map.EntryProcessor;
+import com.hazelcast.map.ExtendedMapEntry;
+
+import io.github.grrolland.hcshm.ShmValue;
 
 /**
  * Entry processor for the touch command
  */
-public class TouchProcessor implements EntryProcessor<String, ShmValue, Object>, Serializable {
+public class TouchProcessor implements EntryProcessor<String, ShmValue, Object> {
     /**
      * Touch expiration
      */
     private int expire = 0;
-    /**
-     * Region Locator
-     */
-    private ShmRegionLocator regionLocator = new ShmRegionLocator();
-
+ 
     /**
      * constructor
      * @param expire touch expiration
@@ -54,12 +49,11 @@ public class TouchProcessor implements EntryProcessor<String, ShmValue, Object>,
      */
     @Override
     public Object process(Map.Entry<String, ShmValue> entry) {
-
         final ShmValue r = entry.getValue();
         final String key = entry.getKey();
         if (null != r) {
             r.expire(expire);
-            regionLocator.getMap(HazelcastInstanceHandler.getInstance(), key).set(key, r, expire, TimeUnit.SECONDS);
+        	((ExtendedMapEntry<String, ShmValue>) entry).setValue(r, expire, TimeUnit.SECONDS);
         }
         return null;
     }

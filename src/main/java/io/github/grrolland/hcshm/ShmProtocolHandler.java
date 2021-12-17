@@ -17,6 +17,9 @@
  */
 package io.github.grrolland.hcshm;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.github.grrolland.hcshm.commands.Command;
 import io.github.grrolland.hcshm.commands.CommandFactory;
 import io.vertx.core.Handler;
@@ -30,6 +33,7 @@ import io.vertx.core.parsetools.RecordParser;
  * @author grrolland
  */
 public class ShmProtocolHandler implements Handler<Buffer> {
+	Logger logger = LoggerFactory.getLogger(ShmProtocolHandler.class);
     /**
      * Protocol Encoding
      */
@@ -93,7 +97,9 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     @Override
     public void handle(Buffer buffer) {
-
+    	if (buffer != null && logger.isDebugEnabled()) {
+    		logger.debug("handling buffer [{}]", buffer.toString(PROTOCOL_ENCODING));
+    	}
         if (expectedMode == FrameMode.COMMAND) {
 
             final String[] commandTokens = buffer.toString(PROTOCOL_ENCODING).split(COMMAND_LINE_DELIMITER);
@@ -123,6 +129,9 @@ public class ShmProtocolHandler implements Handler<Buffer> {
             expectedMode = FrameMode.COMMAND;
             parser.delimitedMode(PROTOCOL_DELIMITER);
         }
+    	if (buffer != null && logger.isDebugEnabled()) {
+    		logger.debug("Done handling buffer [{}]", buffer.toString(PROTOCOL_ENCODING));
+    	}
 
     }
 
