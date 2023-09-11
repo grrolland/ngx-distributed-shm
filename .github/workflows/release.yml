@@ -6,11 +6,11 @@ on:
       - 'release-*'
 
 env:
-  REGISTRY: ghcr.io
-  ALTERNATE_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
-  IMAGE_NAME: ${{ github.repository }}
-  SONAR_URL: https://sonarcloud.io
-  SONAR_ORG: grrolland-github
+  # REGISTRY: ghcr.io
+  # ALTERNATE_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+  # IMAGE_NAME: ${{ github.repository }}
+  # SONAR_URL: https://sonarcloud.io
+  # SONAR_ORG: grrolland-github
 
 jobs:
   release:
@@ -32,10 +32,10 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
           cache: maven
-      - name: Configure Git user
-        run: |
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
+      # - name: Configure Git user
+      #   run: |
+      #     git config user.email "actions@github.com"
+      #     git config user.name "GitHub Actions"
       - name: Perform Release
         run: mvn -B -Dtag=${GITHUB_REF##*release-} release:prepare release:perform
         env:
@@ -55,70 +55,63 @@ jobs:
             package \
             org.jacoco:jacoco-maven-plugin:report \
             sonar:sonar \
-            -B -e -V \
-          	-Dsonar.host.url=$SONAR_URL \
-          	-Dsonar.login=$SONAR_TOKEN \
-            -Dsonar.organization=$SONAR_ORG \
-            -Dsonar.sources=src/main \
-            -Dsonar.junit.reportPaths=target/surefire-reports \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            -B -e -V 
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       ##
       #  Publish to Github Docker Registry
       #
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Log in to the Container registry
+      #   uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      #   with:
+      #     registry: ${{ env.REGISTRY }}
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            ${{ steps.get_tag_name.outputs.VERSION }}
-            latest
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      #   with:
+      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      #     tags: |
+      #       ${{ steps.get_tag_name.outputs.VERSION }}
+      #       latest
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
 
       ##
       #  Publish to Alternate Docker Registry
       #
-      - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
-        with:
-          registry: ${{ env.ALTERNATE_REGISTRY }}
-          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
-          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      # - name: Log in to the Container registry
+      #   uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+      #   with:
+      #     registry: ${{ env.ALTERNATE_REGISTRY }}
+      #     username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+      #     password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta_alt
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.ALTERNATE_REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            ${{ steps.get_tag_name.outputs.VERSION }}
-            latest
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta_alt
+      #   uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      #   with:
+      #     images: ${{ env.ALTERNATE_REGISTRY }}/${{ env.IMAGE_NAME }}
+      #     tags: |
+      #       ${{ steps.get_tag_name.outputs.VERSION }}
+      #       latest
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta_alt.outputs.tags }}
-          labels: ${{ steps.meta_alt.outputs.labels }}
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      #   with:
+      #     context: .
+      #     push: true
+      #     tags: ${{ steps.meta_alt.outputs.tags }}
+      #     labels: ${{ steps.meta_alt.outputs.labels }}
 
       ##
       #  Create a Github Release

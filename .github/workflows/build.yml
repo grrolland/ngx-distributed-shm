@@ -6,7 +6,7 @@ on:
       - 'release-*'
 
 jobs:
-  release:
+  run-mvn-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
