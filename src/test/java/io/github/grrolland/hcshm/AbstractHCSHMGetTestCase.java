@@ -63,7 +63,7 @@ public abstract class AbstractHCSHMGetTestCase {
     @Before
     public void before() {
         try {
-            Socket sock = new Socket(InetAddress.getByName("localhost"), 4321);
+            Socket sock = new Socket(InetAddress.getByName("localhost"), 40321);
             reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             writer = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
             flush();
