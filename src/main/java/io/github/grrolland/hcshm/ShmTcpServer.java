@@ -43,7 +43,6 @@ public class ShmTcpServer extends AbstractVerticle {
 
     /**
      * Start the TCP Server
-     * @throws Exception unable to start the server
      */
     @Override
     public void start() {
