@@ -18,9 +18,7 @@
 package io.github.grrolland.hcshm.processor;
 
 import com.hazelcast.map.EntryProcessor;
-import com.hazelcast.map.IMap;
-import io.github.grrolland.hcshm.HazelcastInstanceHandler;
-import io.github.grrolland.hcshm.ShmRegionLocator;
+import com.hazelcast.map.ExtendedMapEntry;
 import io.github.grrolland.hcshm.ShmValue;
 
 import java.io.Serializable;
@@ -47,11 +45,6 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
     private final int initialExpire;
 
     /**
-     * Region locator
-     */
-    private final ShmRegionLocator regionLocator = new ShmRegionLocator();
-
-    /**
      * Constructor
      *
      * @param value
@@ -76,9 +69,11 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
      */
     @Override
     public Object process(Map.Entry<String, ShmValue> entry) {
+
         final ShmValue r = entry.getValue();
         String newval;
         int expire;
+        ExtendedMapEntry<String, ShmValue> extendedMapEntry = (ExtendedMapEntry<String, ShmValue>) entry;
         if (null != r) {
             try {
                 newval = Long.toString(Long.parseLong(r.getValue()) + value);
@@ -90,12 +85,12 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
             newval = Long.toString(value + init);
             expire = this.initialExpire;
         }
-        IMap<String, ShmValue> map = regionLocator.getMap(HazelcastInstanceHandler.getInstance(), entry.getKey());
         if (expire >= 0) {
-            map.set(entry.getKey(), new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
+            extendedMapEntry.setValue(new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
         } else {
-            map.remove(entry.getKey());
+            extendedMapEntry.setValue(null);
         }
         return newval;
     }
+
 }

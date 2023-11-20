@@ -85,15 +85,16 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
      * Test Incrementation
      */
     @Test
-    public void testIncrExistingWithExpire() {
+    public void testIncrExistingWithoutExpire() {
 
         try {
-            // Increment testIncrExpire
+            // SET key without expire
             getWriter().write("SET key 0 2\r\n");
             getWriter().write("10");
             getWriter().flush();
             assertGetValue("10");
 
+            // INCR with expire
             getWriter().write("INCR key -1 10 2\r\n");
             getWriter().flush();
             assertGetValue("9");

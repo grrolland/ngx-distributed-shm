@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.9.xsd"
+<hazelcast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns="http://www.hazelcast.com/schema/config"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <group>
-        <name>ngx-dshm</name>
-        <password>dev-pass</password>
-    </group>
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config
+           http://www.hazelcast.com/schema/config/hazelcast-config-5.0.xsd">
+
+    <cluster-name>ngx-dshm</cluster-name>
 
     <network>
         <port auto-increment="false">5701</port>
         <join>
-            <multicast enabled="false" />
+            <multicast enabled="false"/>
             <tcp-ip enabled="true">
                 <interface>127.0.0.1</interface>
                 <member-list>
                     <member>127.0.0.1</member>
                 </member-list>
             </tcp-ip>
-            <aws enabled="false" />
+            <aws enabled="false"/>
         </join>
     </network>
 
@@ -27,11 +26,8 @@
         <async-backup-count>0</async-backup-count>
         <time-to-live-seconds>0</time-to-live-seconds>
         <max-idle-seconds>0</max-idle-seconds>
-        <eviction-policy>NONE</eviction-policy>
-        <max-size policy="PER_NODE">0</max-size>
-        <eviction-percentage>25</eviction-percentage>
-        <min-eviction-check-millis>100</min-eviction-check-millis>
-        <merge-policy>com.hazelcast.map.merge.PutIfAbsentMapMergePolicy</merge-policy>
+        <eviction eviction-policy="NONE"/>
+        <merge-policy>PutIfAbsentMergePolicy</merge-policy>
         <cache-deserialized-values>INDEX-ONLY</cache-deserialized-values>
     </map>
 
