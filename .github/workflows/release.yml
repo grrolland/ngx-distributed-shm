@@ -11,6 +11,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   SONAR_URL: https://sonarcloud.io
   SONAR_ORG: grrolland-github
+  SONAR_PROJECT_KEY: grrolland_ngx-distributed-shm
 
 jobs:
   release:
@@ -59,6 +60,7 @@ jobs:
           	-Dsonar.host.url=$SONAR_URL \
           	-Dsonar.login=$SONAR_TOKEN \
             -Dsonar.organization=$SONAR_ORG \
+            -Dsonar.projectKey=$SONAR_PROJECT_KEY \
             -Dsonar.sources=src/main \
             -Dsonar.junit.reportPaths=target/surefire-reports \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
