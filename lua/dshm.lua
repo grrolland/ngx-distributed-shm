@@ -1,4 +1,3 @@
-
 local escape_uri = ngx.escape_uri
 local unescape_uri = ngx.unescape_uri
 local match = string.match
@@ -120,7 +119,7 @@ function _M.get(self, key)
         return nil, "not initialized"
     end
 
-    local bytes, err = sock:send("get " .. self.escape_key(key) .. "\r\n" )
+    local bytes, err = sock:send("get " .. self.escape_key(key) .. "\r\n")
     if not bytes then
         return nil, err
     end
@@ -150,7 +149,6 @@ function _M.get(self, key)
 
 end
 
-
 function _M.delete(self, key)
 
     ngx.log(ngx.DEBUG, "Delete : ", key)
@@ -160,7 +158,7 @@ function _M.delete(self, key)
         return nil, "not initialized"
     end
 
-    local bytes, err = sock:send("delete " .. self.escape_key(key) .. "\r\n" )
+    local bytes, err = sock:send("delete " .. self.escape_key(key) .. "\r\n")
     if not bytes then
         return nil, err
     end
@@ -176,10 +174,9 @@ function _M.delete(self, key)
 
 end
 
+function _M.incr(self, key, value, init, init_ttl)
 
-function _M.incr(self, key, value, init)
-
-    ngx.log(ngx.DEBUG, "Incr : ", key, ", Value : ", value, ", Init : ", init)
+    ngx.log(ngx.DEBUG, "Incr : ", key, ", Value : ", value, ", Init : ", init, ", Init_TTL", init_ttl)
 
     local sock = self.sock
     if not sock then
@@ -191,7 +188,13 @@ function _M.incr(self, key, value, init)
         l_init = init
     end
 
-    local bytes, err = sock:send("incr " .. self.escape_key(key) .. " " .. value .. " " .. l_init .. "\r\n")
+    local s_init_ttl = ""
+    if init_ttl then
+        s_init_ttl = " " .. init_ttl
+    end
+
+    local command = "incr " .. self.escape_key(key) .. " " .. value .. " " .. l_init .. s_init_ttl .. "\r\n"
+    local bytes, err = sock:send(command)
     if not bytes then
         return nil, err
     end
@@ -261,7 +264,6 @@ function _M.set(self, key, value, exptime)
 
 end
 
-
 function _M.touch(self, key, exptime)
 
     if not exptime or exptime == 0 then
@@ -294,7 +296,6 @@ function _M.touch(self, key, exptime)
     end
 
 end
-
 
 function _M.quit(self)
     local sock = self.sock
@@ -337,7 +338,6 @@ function _M.set_keepalive(self, ...)
 
     return sock:setkeepalive(...)
 end
-
 
 function _M.get_reused_times(self)
     local sock = self.sock
