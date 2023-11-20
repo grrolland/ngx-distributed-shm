@@ -97,42 +97,38 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      */
     @Override
     public void handle(Buffer buffer) {
-    	if (buffer != null && logger.isDebugEnabled()) {
-    		logger.debug("handling buffer [{}]", buffer.toString(PROTOCOL_ENCODING));
-    	}
-        if (expectedMode == FrameMode.COMMAND) {
-
-            final String[] commandTokens = buffer.toString(PROTOCOL_ENCODING).split(COMMAND_LINE_DELIMITER);
-            currentCommand = commandFactory.get(commandTokens);
-            final String result = currentCommand.execute(commandTokens);
-
-            socket.write(result, PROTOCOL_ENCODING);
-
-            if (currentCommand.isTerminationCommand()) {
-                socket.close();
+        if (null != buffer) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("handling buffer [{}]", buffer.toString(PROTOCOL_ENCODING));
             }
-            else if (currentCommand.needsDataPart())
-            {
-                expectedMode = FrameMode.DATA;
-                parser.fixedSizeMode(currentCommand.getDataPartSize());
-            }
-            else
-            {
+            if (expectedMode == FrameMode.COMMAND) {
+
+                final String[] commandTokens = buffer.toString(PROTOCOL_ENCODING).split(COMMAND_LINE_DELIMITER);
+                currentCommand = commandFactory.get(commandTokens);
+                final String result = currentCommand.execute(commandTokens);
+
+                socket.write(result, PROTOCOL_ENCODING);
+
+                if (currentCommand.isTerminationCommand()) {
+                    socket.close();
+                } else if (currentCommand.needsDataPart()) {
+                    expectedMode = FrameMode.DATA;
+                    parser.fixedSizeMode(currentCommand.getDataPartSize());
+                } else {
+                    expectedMode = FrameMode.COMMAND;
+                    parser.delimitedMode(PROTOCOL_DELIMITER);
+                }
+
+            } else {
+                final String result = currentCommand.executeDataPart(buffer.toString(PROTOCOL_ENCODING));
+                socket.write(result, PROTOCOL_ENCODING);
                 expectedMode = FrameMode.COMMAND;
                 parser.delimitedMode(PROTOCOL_DELIMITER);
             }
-
+            if (logger.isDebugEnabled()) {
+                logger.debug("Done handling buffer [{}]", buffer.toString(PROTOCOL_ENCODING));
+            }
         }
-        else {
-            final String result = currentCommand.executeDataPart(buffer.toString(PROTOCOL_ENCODING));
-            socket.write(result, PROTOCOL_ENCODING);
-            expectedMode = FrameMode.COMMAND;
-            parser.delimitedMode(PROTOCOL_DELIMITER);
-        }
-    	if (buffer != null && logger.isDebugEnabled()) {
-    		logger.debug("Done handling buffer [{}]", buffer.toString(PROTOCOL_ENCODING));
-    	}
-
     }
 
     /**

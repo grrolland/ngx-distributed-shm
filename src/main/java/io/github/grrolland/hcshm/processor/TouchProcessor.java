@@ -50,7 +50,6 @@ public class TouchProcessor implements EntryProcessor<String, ShmValue, Object> 
     @Override
     public Object process(Map.Entry<String, ShmValue> entry) {
         final ShmValue r = entry.getValue();
-        final String key = entry.getKey();
         if (null != r) {
             r.expire(expire);
         	((ExtendedMapEntry<String, ShmValue>) entry).setValue(r, expire, TimeUnit.SECONDS);

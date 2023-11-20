@@ -1,7 +1,7 @@
 [![Build](https://github.com/grrolland/ngx-distributed-shm/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/grrolland/ngx-distributed-shm/actions/workflows/build.yml)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=alert_status)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
-[![Technical debt ratio](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=sqale_index)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=io.github.grrolland%3Angx-distributed-shm&metric=coverage)](https://sonarcloud.io/dashboard/index/io.github.grrolland:ngx-distributed-shm)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=grrolland_ngx-distributed-shm&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=grrolland_ngx-distributed-shm)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=grrolland_ngx-distributed-shm&metric=bugs)](https://sonarcloud.io/summary/new_code?id=grrolland_ngx-distributed-shm)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=grrolland_ngx-distributed-shm&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=grrolland_ngx-distributed-shm)
 [![Release](https://img.shields.io/github/release/grrolland/ngx-distributed-shm)](https://github.com/grrolland/ngx-distributed-shm/tags/)
 
 # ngx-distributed-shm
