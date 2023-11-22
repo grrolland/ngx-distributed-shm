@@ -27,7 +27,9 @@ public class TouchCommand extends Command {
 
     /**
      * Default Constructor
-     * @param service the shm service
+     *
+     * @param service
+     *         the shm service
      */
     TouchCommand(ShmService service) {
         super(service);
@@ -35,7 +37,9 @@ public class TouchCommand extends Command {
 
     /**
      * Execute the command
-     * @param commandTokens the protocol tokens argument of the command
+     *
+     * @param commandTokens
+     *         the protocol tokens argument of the command
      * @return the result of the command 'protocol encoded'
      */
     public String execute(String[] commandTokens) {
