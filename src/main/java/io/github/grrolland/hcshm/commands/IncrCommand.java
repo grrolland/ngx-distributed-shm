@@ -49,7 +49,7 @@ public class IncrCommand extends Command {
             String key = getKey(commandTokens[1]);
             int incr = getIncrValue(commandTokens[2]);
             int initial = getIncrValue(commandTokens[3]);
-            int initialExpire = commandTokens.length == 5 ? getExpire(commandTokens[4]) : 0;
+            long initialExpire = commandTokens.length == 5 ? getExpire(commandTokens[4]) : 0;
             String value = getService().incr(key, incr, initial, initialExpire);
             writeLen(response, value);
             writeValue(response, value);

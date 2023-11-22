@@ -17,8 +17,11 @@
  */
 package io.github.grrolland.hcshm;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -86,23 +89,75 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
      * Test Incrementation
      */
     @Test
-    public void testMultiIncrExpire() {
+    public void testMultiIncrExpireLoad() throws IOException {
+        Logger logger = (Logger) LoggerFactory.getLogger(IncrTestCase.class);
+        logger.setLevel(Level.INFO);
+        // Increment key
+        for (int i = 1; i <= 200; i++) {
+            getWriter().write("INCR key 1 0 60\r\n");
+            getWriter().flush();
+            logger.info("Expect value {}", i);
+            assertResponseGetValue(String.valueOf(i));
+        }
+    }
+
+    /**
+     * Test Incrementation
+     */
+    @Test
+    public void testMultiIncr() {
 
         try {
+            //Delete KEY
+            getWriter().write("DELETE key\r\n");
+            getWriter().flush();
+            assertResponseDone();
+
             // Increment key
-            getWriter().write("INCR key -1 10 3\r\n");
+            getWriter().write("INCR key -1 10 4\r\n");
             getWriter().flush();
             assertResponseGetValue("9");
 
             // Pause
-            pause();
+            pause(2000);
 
-            getWriter().write("INCR key -1 10 4\r\n");
+            getWriter().write("INCR key -1 10\r\n");
             getWriter().flush();
             assertResponseGetValue("8");
 
             // Pause
-            pause();
+            pause(5000);
+            getWriter().write("GET key\r\n");
+            getWriter().flush();
+            assertResponseNotFound();
+
+        } catch (IOException | InterruptedException e) {
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    /**
+     * Test Incrementation
+     */
+    @Test
+    public void testMultiIncrExpire() {
+
+        try {
+            // Increment key
+            getWriter().write("INCR key -1 10 4\r\n");
+            getWriter().flush();
+            assertResponseGetValue("9");
+
+            // Pause
+            pause(2000);
+
+            getWriter().write("INCR key -1 10 60\r\n");
+            getWriter().flush();
+            assertResponseGetValue("8");
+
+            // Pause
+            pause(4000);
             getWriter().write("GET key\r\n");
             getWriter().flush();
             assertResponseNotFound();
@@ -120,6 +175,11 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
     public void testIncrExistingWithoutExpire() {
 
         try {
+            // Prepare test
+            getWriter().write("DELETE key\r\n");
+            getWriter().flush();
+            assertResponseDone();
+
             // SET key without expire
             getWriter().write("SET key 0 2\r\n");
             getWriter().write("10");
