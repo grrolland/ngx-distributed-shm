@@ -31,7 +31,7 @@ public class SetCommand extends Command {
     private String key = null;
 
     /**
-     * The expiration in ms
+     * The expiration in milliseconds
      */
     private long expire = 0;
 
