@@ -48,7 +48,7 @@
         <vertx.version>4.4.5</vertx.version>
         <hazelcast.version>5.3.1</hazelcast.version>
         <slf4j.version>2.0.4</slf4j.version>
-        <logback.version>1.4.11</logback.version>
+        <logback.version>1.3.11</logback.version>
         <junit.version>4.13.2</junit.version>
         <resilience4j-retry.version>1.7.0</resilience4j-retry.version>
     </properties>

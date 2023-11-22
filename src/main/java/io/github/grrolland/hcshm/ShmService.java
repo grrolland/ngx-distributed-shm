@@ -73,11 +73,11 @@ public class ShmService {
      * @param value
      *         the value as string
      * @param expire
-     *         the expiration in seconds
+     *         the expiration in milliseconds
      * @return the value set
      */
-    public String set(String key, String value, int expire) {
-        getMap(key).set(key, new ShmValue(value, expire), expire, TimeUnit.SECONDS);
+    public String set(String key, String value, long expire) {
+        getMap(key).set(key, new ShmValue(value, expire), expire, TimeUnit.MILLISECONDS);
         return value;
     }
 
@@ -89,12 +89,12 @@ public class ShmService {
      * @param value
      *         the value as long
      * @param expire
-     *         the expiration in seconds
+     *         the expiration in milliseconds
      * @return the value set as string representation
      */
-    public String set(String key, long value, int expire) {
+    public String set(String key, long value, long expire) {
         String r = Long.toString(value);
-        getMap(key).set(key, new ShmValue(r, expire), expire, TimeUnit.SECONDS);
+        getMap(key).set(key, new ShmValue(r, expire), expire, TimeUnit.MILLISECONDS);
         return r;
     }
 
@@ -104,9 +104,9 @@ public class ShmService {
      * @param key
      *         the key
      * @param expire
-     *         the expiration in seconds
+     *         the expiration in milliseconds
      */
-    public void touch(String key, int expire) {
+    public void touch(String key, long expire) {
         getMap(key).executeOnKey(key, new TouchProcessor(expire));
     }
 
@@ -123,7 +123,7 @@ public class ShmService {
      *         the initial expiration
      * @return the new value as string representation
      */
-    public String incr(String key, int value, int init, int initialExpire) {
+    public String incr(String key, int value, int init, long initialExpire) {
         return (String) getMap(key).executeOnKey(key, new IncrProcessor(value, init, initialExpire));
     }
 

@@ -69,7 +69,7 @@ public abstract class AbstractHCSHMGetTestCase {
     }
 
     /**
-     * get Retry
+     * Get Retry
      *
      * @return the retry
      */
@@ -99,10 +99,20 @@ public abstract class AbstractHCSHMGetTestCase {
      * Wait (2000 ms)
      *
      * @throws InterruptedException
-     *         exception when  trying to sleep the current thread
+     *         exception when trying to sleep the current thread
      */
     public static void pause() throws InterruptedException {
-        Thread.sleep(2000); // NOSONAR
+        pause(2000);
+    }
+
+    /***
+     * Pause the test during <code>duration</code> milliseconds
+     * @param duration  the duration time in milliseconds
+     * @throws InterruptedException
+     *         exception when trying to sleep the current thread
+     */
+    public static void pause(long duration) throws InterruptedException {
+        Thread.sleep(duration); // NOSONAR
     }
 
     /**
@@ -206,6 +216,7 @@ public abstract class AbstractHCSHMGetTestCase {
      * Assert response is DONE
      *
      * @throws IOException
+     *         I/O Exception
      */
     public void assertResponseDone() throws IOException {
         String res = getReader().readLine();

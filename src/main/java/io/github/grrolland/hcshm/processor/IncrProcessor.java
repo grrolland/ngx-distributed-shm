@@ -40,9 +40,9 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
     private final int init;
 
     /**
-     * Initial TTL value
+     * Initial TTL value in milliseconds
      */
-    private final int initialExpire;
+    private final long initialExpire;
 
     /**
      * Constructor
@@ -52,9 +52,9 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
      * @param init
      *         initial value
      * @param initialExpire
-     *         the initial expiration
+     *         the initial expiration in milliseconds
      */
-    public IncrProcessor(long value, int init, int initialExpire) {
+    public IncrProcessor(long value, int init, long initialExpire) {
         this.value = value;
         this.init = init;
         this.initialExpire = initialExpire;
@@ -72,7 +72,7 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
 
         final ShmValue r = entry.getValue();
         String newval;
-        int expire;
+        long expire;
         ExtendedMapEntry<String, ShmValue> extendedMapEntry = (ExtendedMapEntry<String, ShmValue>) entry;
         if (null != r) {
             try {
@@ -86,7 +86,7 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
             expire = this.initialExpire;
         }
         if (expire >= 0) {
-            extendedMapEntry.setValue(new ShmValue(newval, expire), expire, TimeUnit.SECONDS);
+            extendedMapEntry.setValue(new ShmValue(newval, expire), expire, TimeUnit.MILLISECONDS);
         } else {
             extendedMapEntry.setValue(null);
         }
