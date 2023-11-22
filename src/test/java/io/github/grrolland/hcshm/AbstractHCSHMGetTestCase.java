@@ -17,6 +17,10 @@
  */
 package io.github.grrolland.hcshm;
 
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.vavr.CheckedFunction0;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,16 +32,23 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.time.Duration;
 
 /**
  * Global Protocol Test Case
  */
 public abstract class AbstractHCSHMGetTestCase {
 
+    // Wait duration in second
+    public static final int OPEN_SOCKET_WAIT_DURATION = 2;
+
+    // Max retry
+    public static final int SOCKET_RETRY_LOOP = 10;
+
     /**
      * Test Socket
      */
-    private final Socket sock = null;
+    private Socket sock = null;
 
     /**
      * Socket Reader
@@ -58,18 +69,51 @@ public abstract class AbstractHCSHMGetTestCase {
     }
 
     /**
+     * get Retry
+     *
+     * @return the retry
+     */
+    private static Retry getRetry() {
+        RetryConfig config = RetryConfig.custom()
+                // Max
+                .maxAttempts(SOCKET_RETRY_LOOP)
+                // Sleep
+                .waitDuration(Duration.ofSeconds(OPEN_SOCKET_WAIT_DURATION))
+                // Retry on IOException
+                .retryExceptions(IOException.class)
+                // Fail
+                .failAfterMaxAttempts(true)
+                //
+                .writableStackTraceEnabled(true)
+                // Build
+                .build();
+
+        // Create the RetryRegistry
+        RetryRegistry registry = RetryRegistry.of(config);
+
+        // Create the retry
+        return registry.retry("openSocket", config);
+    }
+
+    /**
+     * Wait (2000 ms)
+     *
+     * @throws InterruptedException
+     *         exception when  trying to sleep the current thread
+     */
+    public static void pause() throws InterruptedException {
+        Thread.sleep(2000); // NOSONAR
+    }
+
+    /**
      * Init Socket, Reader and Writer
      */
     @Before
-    public void before() {
-        try {
-            Socket sock = new Socket(InetAddress.getByName("localhost"), 40321);
-            reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-            writer = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
-            flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void before() throws Throwable {
+        sock = this.openSocketWithRetry();
+        reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+        writer = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
+        flushAll();
     }
 
     /**
@@ -78,8 +122,8 @@ public abstract class AbstractHCSHMGetTestCase {
      * @throws IOException
      *         I/O exception
      */
-    public void flush() throws IOException {
-        this.flush("");
+    public void flushAll() throws IOException {
+        this.flushAll("");
     }
 
     /**
@@ -90,7 +134,7 @@ public abstract class AbstractHCSHMGetTestCase {
      * @throws IOException
      *         I/O exception
      */
-    public void flush(String region) throws IOException {
+    public void flushAll(String region) throws IOException {
         getWriter().write(String.format("FLUSHALL %s\r\n", region));
         getWriter().flush();
         getReader().readLine();
@@ -108,30 +152,80 @@ public abstract class AbstractHCSHMGetTestCase {
             if (writer != null) {
                 writer.close();
             }
-            if (sock != null) {
+            if (sock != null && !sock.isClosed()) {
                 sock.shutdownInput();
                 sock.shutdownOutput();
                 sock.close();
             }
         } catch (IOException e) {
+            // Ignore shutdown issue
             e.printStackTrace();
         }
     }
 
     /**
-     * Assert a value is read
+     * Assert that response get the value <code>expect</code>
      *
      * @param expect
      *         expected value
      * @throws IOException
      *         I/O Exception
      */
-    public void assertGetValue(String expect) throws IOException {
+    public void assertResponseGetValue(String expect) throws IOException {
         String res = getReader().readLine();
         Assert.assertEquals("LEN " + expect.length(), res);
         res = getReader().readLine();
         Assert.assertEquals(expect, res);
         res = getReader().readLine();
         Assert.assertEquals("DONE", res);
+    }
+
+    /**
+     * Assert response is key not found
+     *
+     * @throws IOException
+     *         I/O Exception
+     */
+    public void assertResponseNotFound() throws IOException {
+        String res = getReader().readLine();
+        Assert.assertEquals("ERROR not_found", res);
+    }
+
+    /**
+     * Assert response is malformed request
+     *
+     * @throws IOException
+     *         I/O Exception
+     */
+    public void assertResponseMalFormedRequest() throws IOException {
+        String res = getReader().readLine();
+        Assert.assertEquals("ERROR malformed_request", res);
+    }
+
+    /**
+     * Assert response is DONE
+     *
+     * @throws IOException
+     */
+    public void assertResponseDone() throws IOException {
+        String res = getReader().readLine();
+        Assert.assertEquals("DONE", res);
+    }
+
+    /**
+     * Open socket with retry
+     *
+     * @return Socket
+     * @throws InterruptedException
+     *         exception while opening socket
+     */
+    private Socket openSocketWithRetry() throws Throwable {
+        Retry retry = getRetry();
+        CheckedFunction0<Socket> retryingOpenSocket = Retry.decorateCheckedSupplier(retry, this::openSocket);
+        return retryingOpenSocket.apply();
+    }
+
+    private Socket openSocket() throws IOException {
+        return new Socket(InetAddress.getByName("localhost"), 40321);
     }
 }

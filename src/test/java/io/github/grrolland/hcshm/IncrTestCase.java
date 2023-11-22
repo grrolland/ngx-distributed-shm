@@ -37,15 +37,15 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
             getWriter().write("SET key 0 10\r\n");
             getWriter().write("1234567890");
             getWriter().flush();
-            assertGetValue("1234567890");
+            assertResponseGetValue("1234567890");
 
             getWriter().write("INCR key 1 0\r\n");
             getWriter().flush();
-            assertGetValue("1234567891");
+            assertResponseGetValue("1234567891");
 
             getWriter().write("GET key\r\n");
             getWriter().flush();
-            assertGetValue("1234567891");
+            assertResponseGetValue("1234567891");
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -60,20 +60,21 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
     public void testIncrExpire() {
 
         try {
-            // Icrement testIncrExpire
+            // Increment key
             getWriter().write("INCR key -1 10 2\r\n");
             getWriter().flush();
-            assertGetValue("9");
+            assertResponseGetValue("9");
 
+            // get key
             getWriter().write("GET key\r\n");
             getWriter().flush();
-            assertGetValue("9");
+            assertResponseGetValue("9");
 
+            // Pause
             Thread.sleep(3000); // NOSONAR
             getWriter().write("GET key\r\n");
             getWriter().flush();
-            String res = getReader().readLine();
-            Assert.assertEquals("ERROR not_found", res);
+            assertResponseNotFound();
 
         } catch (IOException | InterruptedException e) {
             Assert.fail(e.getMessage());
@@ -85,29 +86,61 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
      * Test Incrementation
      */
     @Test
-    public void testIncrExistingWithExpire() {
+    public void testMultiIncrExpire() {
 
         try {
-            // Increment testIncrExpire
+            // Increment key
+            getWriter().write("INCR key -1 10 3\r\n");
+            getWriter().flush();
+            assertResponseGetValue("9");
+
+            // Pause
+            pause();
+
+            getWriter().write("INCR key -1 10 4\r\n");
+            getWriter().flush();
+            assertResponseGetValue("8");
+
+            // Pause
+            pause();
+            getWriter().write("GET key\r\n");
+            getWriter().flush();
+            assertResponseNotFound();
+
+        } catch (IOException | InterruptedException e) {
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    /**
+     * Test Incrementation
+     */
+    @Test
+    public void testIncrExistingWithoutExpire() {
+
+        try {
+            // SET key without expire
             getWriter().write("SET key 0 2\r\n");
             getWriter().write("10");
             getWriter().flush();
-            assertGetValue("10");
+            assertResponseGetValue("10");
 
+            // INCR with expire
             getWriter().write("INCR key -1 10 2\r\n");
             getWriter().flush();
-            assertGetValue("9");
+            assertResponseGetValue("9");
 
             getWriter().write("GET key\r\n");
             getWriter().flush();
-            assertGetValue("9");
+            assertResponseGetValue("9");
 
             // Key should not expire
             Thread.sleep(3000); // NOSONAR
 
             getWriter().write("GET key\r\n");
             getWriter().flush();
-            assertGetValue("9");
+            assertResponseGetValue("9");
 
         } catch (IOException | InterruptedException e) {
             Assert.fail(e.getMessage());
@@ -125,15 +158,15 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
             getWriter().write("SET region:key 0 10\r\n");
             getWriter().write("1234567890");
             getWriter().flush();
-            assertGetValue("1234567890");
+            assertResponseGetValue("1234567890");
 
             getWriter().write("INCR region:key 1 0\r\n");
             getWriter().flush();
-            assertGetValue("1234567891");
+            assertResponseGetValue("1234567891");
 
             getWriter().write("GET region:key\r\n");
             getWriter().flush();
-            assertGetValue("1234567891");
+            assertResponseGetValue("1234567891");
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -151,15 +184,15 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
             getWriter().write("SET key 0 10\r\n");
             getWriter().write("AZERTYUIOP");
             getWriter().flush();
-            assertGetValue("AZERTYUIOP");
+            assertResponseGetValue("AZERTYUIOP");
 
             getWriter().write("INCR key 1 0\r\n");
             getWriter().flush();
-            assertGetValue("AZERTYUIOP");
+            assertResponseGetValue("AZERTYUIOP");
 
             getWriter().write("GET key\r\n");
             getWriter().flush();
-            assertGetValue("AZERTYUIOP");
+            assertResponseGetValue("AZERTYUIOP");
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -177,15 +210,15 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
             getWriter().write("SET region:key 0 10\r\n");
             getWriter().write("AZERTYUIOP");
             getWriter().flush();
-            assertGetValue("AZERTYUIOP");
+            assertResponseGetValue("AZERTYUIOP");
 
             getWriter().write("INCR region:key 1 0\r\n");
             getWriter().flush();
-            assertGetValue("AZERTYUIOP");
+            assertResponseGetValue("AZERTYUIOP");
 
             getWriter().write("GET region:key\r\n");
             getWriter().flush();
-            assertGetValue("AZERTYUIOP");
+            assertResponseGetValue("AZERTYUIOP");
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -203,11 +236,11 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
 
             getWriter().write("INCR newkey 1 10\r\n");
             getWriter().flush();
-            assertGetValue("11");
+            assertResponseGetValue("11");
 
             getWriter().write("GET newkey\r\n");
             getWriter().flush();
-            assertGetValue("11");
+            assertResponseGetValue("11");
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -222,14 +255,14 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
     public void testRegionIncrInit() {
 
         try {
-            this.flush("region");
+            this.flushAll("region");
             getWriter().write("INCR region:newkey 1 10\r\n");
             getWriter().flush();
-            assertGetValue("11");
+            assertResponseGetValue("11");
 
             getWriter().write("GET region:newkey\r\n");
             getWriter().flush();
-            assertGetValue("11");
+            assertResponseGetValue("11");
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
@@ -246,8 +279,7 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
         try {
             getWriter().write("INCR notexists bababi\r\n");
             getWriter().flush();
-            String res = getReader().readLine();
-            Assert.assertEquals("ERROR malformed_request", res);
+            assertResponseMalFormedRequest();
 
         } catch (IOException e) {
             Assert.fail(e.getMessage());
