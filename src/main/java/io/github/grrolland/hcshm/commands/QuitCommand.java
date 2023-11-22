@@ -1,17 +1,17 @@
 /**
  * ngx-distributed-shm
  * Copyright (C) 2018  Flu.Tech
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -31,27 +31,28 @@ public class QuitCommand extends Command {
     private boolean isTermination = true;
 
     /**
-     * Default Constructor
-     * @param service the shm service
+     * Get if this command is a termination command and the socket must be closed after the execution
+     *
+     * @return true if this is a termination command
      */
-    QuitCommand(ShmService service) {
-        super(service);
+    @Override
+    public boolean isTerminationCommand() {
+        return isTermination;
     }
 
     /**
      * Execute the command
-     * @param commandTokens the protocol tokens argument of the command
+     *
+     * @param commandTokens
+     *         the protocol tokens argument of the command
      * @return the result of the command 'protocol encoded'
      */
     public String execute(String[] commandTokens) {
         final StringBuilder response = new StringBuilder();
-        try
-        {
+        try {
             assertTokens(commandTokens, 1);
             writeDone(response);
-        }
-        catch (ProtocolException e)
-        {
+        } catch (ProtocolException e) {
             writeMalformedRequest(response);
             isTermination = false;
         }
@@ -59,11 +60,12 @@ public class QuitCommand extends Command {
     }
 
     /**
-     * Get if this command is a termination command and the socket must be closed after the execution
-     * @return true if this is a termination command
+     * Default Constructor
+     *
+     * @param service
+     *         the shm service
      */
-    @Override
-    public boolean isTerminationCommand() {
-        return isTermination;
+    QuitCommand(ShmService service) {
+        super(service);
     }
 }

@@ -1,24 +1,21 @@
 /**
  * ngx-distributed-shm
  * Copyright (C) 2018  Flu.Tech
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 package io.github.grrolland.hcshm;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.github.grrolland.hcshm.commands.Command;
 import io.github.grrolland.hcshm.commands.CommandFactory;
@@ -26,6 +23,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetSocket;
 import io.vertx.core.parsetools.RecordParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Vertx Protocol Handler
@@ -33,7 +32,6 @@ import io.vertx.core.parsetools.RecordParser;
  * @author grrolland
  */
 public class ShmProtocolHandler implements Handler<Buffer> {
-	Logger logger = LoggerFactory.getLogger(ShmProtocolHandler.class);
     /**
      * Protocol Encoding
      */
@@ -46,18 +44,23 @@ public class ShmProtocolHandler implements Handler<Buffer> {
      * Protocol Command Line Delimiter
      */
     public static final String COMMAND_LINE_DELIMITER = " ";
+
+    /**
+     * Logger
+     */
+    private final Logger logger = LoggerFactory.getLogger(ShmProtocolHandler.class);
     /**
      * Vertx NetSocket
      */
-    private NetSocket socket = null;
+    private final NetSocket socket;
+    /**
+     * Vertx record Parser
+     */
+    private final RecordParser parser;
     /**
      * Command Factory
      */
     private CommandFactory commandFactory = null;
-    /**
-     * Vertx record Parser
-     */
-    private RecordParser parser = null;
     /**
      * Expected Protocol Decoding Mode
      */
@@ -68,32 +71,38 @@ public class ShmProtocolHandler implements Handler<Buffer> {
     private Command currentCommand;
 
     /**
-     * Protocol Handler Instance Factory Method
-     * @param socket vertx socket
-     * @param service shm service
-     */
-    public static void create(NetSocket socket, ShmService service) {
-        new ShmProtocolHandler(socket,service);
-    }
-
-    /**
      * Public Constructor
-     * @param socket vertx socket
-     * @param service shm service
+     *
+     * @param socket
+     *         vertx socket
+     * @param service
+     *         shm service
      */
     public ShmProtocolHandler(NetSocket socket, ShmService service) {
         this.socket = socket;
         this.parser = RecordParser.newDelimited(PROTOCOL_DELIMITER, socket);
-        this.parser.endHandler(v -> socket.close())
-            .exceptionHandler(t -> socket.close())
-            .handler(this);
+        this.parser.endHandler(v -> socket.close()).exceptionHandler(t -> socket.close()).handler(this);
         this.commandFactory = new CommandFactory();
         this.commandFactory.setService(service);
     }
 
     /**
+     * Protocol Handler Instance Factory Method
+     *
+     * @param socket
+     *         vertx socket
+     * @param service
+     *         shm service
+     */
+    public static void create(NetSocket socket, ShmService service) {
+        new ShmProtocolHandler(socket, service);
+    }
+
+    /**
      * Protocol Handler implementation
-     * @param buffer vertx buffer
+     *
+     * @param buffer
+     *         vertx buffer
      */
     @Override
     public void handle(Buffer buffer) {

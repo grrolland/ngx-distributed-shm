@@ -1,17 +1,17 @@
 /**
  * ngx-distributed-shm
  * Copyright (C) 2018  Flu.Tech
- *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
@@ -28,8 +28,11 @@ import java.io.Serializable;
 public class ShmRegionLocator implements Serializable {
     /**
      * Get the map form the key name
-     * @param key the key
-     * @param hazelcast hazelcast instance
+     *
+     * @param key
+     *         the key
+     * @param hazelcast
+     *         hazelcast instance
      * @return return the named IMap, if no region in the key return the default IMap
      */
     public IMap<String, ShmValue> getMap(final HazelcastInstance hazelcast, final String key) {
@@ -38,22 +41,26 @@ public class ShmRegionLocator implements Serializable {
 
     /**
      * Get the map form the region name
-     * @param region the key
-     * @param hazelcast hazelcast instance
+     *
+     * @param region
+     *         the key
+     * @param hazelcast
+     *         hazelcast instance
      * @return return the named IMap, if no region return the default IMap
      */
     public IMap<String, ShmValue> getMapRegion(final HazelcastInstance hazelcast, final String region) {
         if (null != region) {
             return hazelcast.getMap(region);
-        }
-        else {
+        } else {
             return hazelcast.getMap("shmmap");
         }
     }
 
     /**
      * Get the region from the key
-     * @param key the key
+     *
+     * @param key
+     *         the key
      * @return the region or null if no region
      */
     private String getRegion(String key) {
