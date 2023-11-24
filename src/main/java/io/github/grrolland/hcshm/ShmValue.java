@@ -17,12 +17,10 @@
  */
 package io.github.grrolland.hcshm;
 
-import java.io.Serializable;
-
 /**
  * Value in the SHM Map
  */
-public class ShmValue implements Serializable {
+public class ShmValue extends AbstractShmValue {
 
     /**
      * The value

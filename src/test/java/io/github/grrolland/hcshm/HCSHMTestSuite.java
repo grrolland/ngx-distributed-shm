@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
         SetTestCase.class,
         TouchTestCase.class,
         UnknownCommandTestCase.class,
+        RateLimiterTestCase.class,
         FlushAllTestCase.class})
 public class HCSHMTestSuite {
 

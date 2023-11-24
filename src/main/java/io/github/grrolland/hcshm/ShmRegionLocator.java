@@ -35,7 +35,7 @@ public class ShmRegionLocator implements Serializable {
      *         hazelcast instance
      * @return return the named IMap, if no region in the key return the default IMap
      */
-    public IMap<String, ShmValue> getMap(final HazelcastInstance hazelcast, final String key) {
+    public <T> IMap<String, T> getMap(final HazelcastInstance hazelcast, final String key) {
         return getMapRegion(hazelcast, getRegion(key));
     }
 
@@ -48,7 +48,7 @@ public class ShmRegionLocator implements Serializable {
      *         hazelcast instance
      * @return return the named IMap, if no region return the default IMap
      */
-    public IMap<String, ShmValue> getMapRegion(final HazelcastInstance hazelcast, final String region) {
+    public <T> IMap<String, T> getMapRegion(final HazelcastInstance hazelcast, final String region) {
         if (null != region) {
             return hazelcast.getMap(region);
         } else {

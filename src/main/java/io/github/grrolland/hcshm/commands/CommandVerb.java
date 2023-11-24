@@ -38,6 +38,10 @@ public enum CommandVerb {
      */
     INCR,
     /**
+     * The RATE_LIMITER command
+     */
+    RATE_LIMITER,
+    /**
      * The Quit Command
      */
     QUIT,

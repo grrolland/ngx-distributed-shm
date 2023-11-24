@@ -20,8 +20,12 @@ package io.github.grrolland.hcshm;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
 import io.github.grrolland.hcshm.processor.IncrProcessor;
+import io.github.grrolland.hcshm.processor.RateLimiterProcessor;
 import io.github.grrolland.hcshm.processor.TouchProcessor;
+import io.github.grrolland.hcshm.ratelimiter.ConsumptionProbe;
+import io.github.grrolland.hcshm.ratelimiter.RateLimiterValue;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,7 +61,8 @@ public class ShmService {
      * @return the value as string or the error
      */
     public String get(String key) {
-        ShmValue r = getMap(key).get(key);
+        IMap<String, AbstractShmValue> map = getMap(key);
+        AbstractShmValue r = map.get(key);
         if (null != r) {
             return r.getValue();
         } else {
@@ -107,7 +112,8 @@ public class ShmService {
      *         the expiration in milliseconds
      */
     public void touch(String key, long expire) {
-        getMap(key).executeOnKey(key, new TouchProcessor(expire));
+        IMap<String, ShmValue> map = getMap(key);
+        map.executeOnKey(key, new TouchProcessor(expire));
     }
 
     /**
@@ -124,7 +130,8 @@ public class ShmService {
      * @return the new value as string representation
      */
     public String incr(String key, int value, int init, long initialExpire) {
-        return (String) getMap(key).executeOnKey(key, new IncrProcessor(value, init, initialExpire));
+        IMap<String, ShmValue> map = getMap(key);
+        return (String) map.executeOnKey(key, new IncrProcessor(value, init, initialExpire));
     }
 
     /**
@@ -147,6 +154,20 @@ public class ShmService {
         regionLocator.getMapRegion(hazelcast, region).clear();
     }
 
+    /***
+     * Consume a token
+     * @param key  the key
+     * @param capacity  the maximum capacity
+     * @param duration the duration of a token
+     * @return the number of tokens remaining
+     */
+    public String rateLimiter(String key, int capacity, long duration) {
+        final IMap<String, RateLimiterValue> map = regionLocator.getMap(hazelcast, key);
+        RateLimiterProcessor rateLimiterProcessor = new RateLimiterProcessor(capacity, Duration.ofMillis(duration));
+        ConsumptionProbe consumptionProbe = (ConsumptionProbe) map.executeOnKey(key, rateLimiterProcessor);
+        return String.valueOf(consumptionProbe.getRemainingTokens());
+    }
+
     /**
      * Get the map form the key name
      *
@@ -154,7 +175,7 @@ public class ShmService {
      *         the key
      * @return return the named IMap, if no region in the key return the default IMap
      */
-    private IMap<String, ShmValue> getMap(final String key) {
+    private <T> IMap<String, T> getMap(final String key) {
         return regionLocator.getMap(hazelcast, key);
     }
 
