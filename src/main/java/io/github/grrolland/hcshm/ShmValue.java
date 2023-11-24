@@ -51,16 +51,15 @@ public class ShmValue implements Serializable {
     /**
      * Get le lasting time for the value
      * <p>
-     * When the time to the expiration deadline is lower than 1000, return -1.
-     * <p>
-     * tha mean the value should expire immediately
+     * When the time to the expiration deadline is lower than 100 milliseconds, return -1.
+     * That mean the value should expire immediately
      *
      * @return the time to the expiration deadline
      */
     public long getLastingTime() {
         if (doExpire) {
             final long lt = deadline - System.currentTimeMillis();
-            if (lt < 1000) {
+            if (lt < 100) {
                 return -1;
             } else {
                 return lt;

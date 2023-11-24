@@ -29,7 +29,8 @@ import org.slf4j.LoggerFactory;
  * Test Suite initializing the distributed SHM
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({DeleteTestCase.class,
+@Suite.SuiteClasses({ShmValueTestCase.class,
+        DeleteTestCase.class,
         GetTestCase.class,
         IncrTestCase.class,
         QuitTestCase.class,
