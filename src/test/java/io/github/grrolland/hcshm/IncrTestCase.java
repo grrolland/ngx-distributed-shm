@@ -92,6 +92,7 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
     public void testMultiIncrExpireLoad() throws IOException {
         Logger logger = (Logger) LoggerFactory.getLogger(IncrTestCase.class);
         logger.setLevel(Level.INFO);
+
         // Increment key
         for (int i = 1; i <= 200; i++) {
             getWriter().write("INCR key 1 0 60\r\n");
@@ -99,6 +100,7 @@ public class IncrTestCase extends AbstractHCSHMGetTestCase {
             logger.info("Expect value {}", i);
             assertResponseGetValue(String.valueOf(i));
         }
+        logger.info("DONE");
     }
 
     /**
