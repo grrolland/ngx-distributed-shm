@@ -370,8 +370,9 @@ INCR key -1 0 60\r\n
 Consumes a token in a sliding window rate limiter with the key `key`. The sliding window duration is configured with `duration` seconds. The
 rate limiter is created automatically
 
-The command try to consume a token and return the available tokens. If there were no more token available, the command return -1, otherwise
-the command return the numbers of available tokens between 0 and `capacity`
+The command attempts to consume a token and return the number of remaining available tokens. If there were no more tokens available, the
+command returns -1, otherwise
+the command return the number of tokens available between 0 and `capacity`
 
 note : GET command with this key return the available tokens
 
