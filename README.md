@@ -78,6 +78,7 @@ The protocol expose commands to interact with the distributed storage :
 - TOUCH : update the ttl of a key
 - DELETE : delete a key from the storage
 - INCR : increment the value for a key
+- RATE_LIMITER : consume a token in the sliding window rate limiter identified by the key
 
 In a clustered deployment (2 or more instances), a client need to connect to only one instance to see all the storage.
 The goal is to provide a near storage associated with a nginx instance.
@@ -136,42 +137,41 @@ named hazelcast.xml.
 This is an example of this file :
 
 ```xml
-
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.9.xsd"
+<?xml version="1.0" encoding="UTF-8"?>
+<hazelcast xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns="http://www.hazelcast.com/schema/config"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <group>
-        <name>ngx-dshm</name>
-        <password>FIXME</password>
-    </group>
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config
+           http://www.hazelcast.com/schema/config/hazelcast-config-5.0.xsd">
+
+    <cluster-name>ngx-dshm</cluster-name>
+
     <network>
         <port auto-increment="false">5701</port>
         <join>
             <multicast enabled="false"/>
             <tcp-ip enabled="true">
-                <interface>10.0.x.y</interface>
+                <interface>127.0.0.1</interface>
                 <member-list>
-                    <member>10.0.x.y:5701</member>
-                    <member>10.0.x.z:5701</member>
+                    <member>127.0.0.1</member>
                 </member-list>
             </tcp-ip>
             <aws enabled="false"/>
         </join>
     </network>
+
     <map name="default">
         <in-memory-format>BINARY</in-memory-format>
         <backup-count>1</backup-count>
         <async-backup-count>0</async-backup-count>
         <time-to-live-seconds>0</time-to-live-seconds>
         <max-idle-seconds>0</max-idle-seconds>
-        <eviction-policy>NONE</eviction-policy>
-        <max-size policy="PER_NODE">0</max-size>
-        <eviction-percentage>25</eviction-percentage>
-        <min-eviction-check-millis>100</min-eviction-check-millis>
-        <merge-policy>com.hazelcast.map.merge.PutIfAbsentMapMergePolicy</merge-policy>
+        <eviction eviction-policy="NONE"/>
+        <merge-policy>PutIfAbsentMergePolicy</merge-policy>
         <cache-deserialized-values>INDEX-ONLY</cache-deserialized-values>
     </map>
+
 </hazelcast>
+
 ```
 
 The reference documentation for this configuration is
@@ -363,6 +363,26 @@ INCR key -1 0\r\n
 INCR key -1 0 60\r\n
 ```
 
+**_RATE_LIMITER \<key\> \<capacity\> \<duration\>_**
+
+**with data:** _no_
+
+Consumes a token in a sliding window rate limiter with the key `key`. The sliding window duration is configured with `duration` seconds. The
+rate limiter is created automatically
+
+The command try to consume a token and return the available tokens. If there were no more token available, the command return -1, otherwise
+the command return the numbers of available tokens between 0 and `capacity`
+
+note : GET command with this key return the available tokens
+
+This operation is atomic.
+
+Example : consumes a token in rate limiter `key` with capacity 1000 tokens every 10 seconds
+
+```
+RATE_LIMITER key 1000 10\r\n
+```
+
 **_FLUSHALL [region]_**
 
 **with data:** _no_
@@ -460,10 +480,10 @@ The session_storage parameter control the storage module to be used.
 - An official docker image build is available at quay.io or directly in the GitHub registry :
 
     ```shell
-    docker pull quay.io/grrolland/ngx-distributed-shm    
+    docker pull quay.io/grrolland/ngx-distributed-shm
     ```
     ```shell
-    docker pull ghcr.io/grrolland/ngx-distributed-shm    
+    docker pull ghcr.io/grrolland/ngx-distributed-shm
     ```
 
 ## Kubernetes
