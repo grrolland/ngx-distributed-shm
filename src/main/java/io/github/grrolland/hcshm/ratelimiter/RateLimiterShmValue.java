@@ -12,11 +12,11 @@ import java.util.List;
 public class RateLimiterShmValue extends AbstractShmValue {
 
     /**
-     * The current consumption records
+     * The number of tokens used
      */
     private final List<Token> tokens;
     /**
-     * Sliding Window duration
+     * The sliding window duration
      */
     private Duration duration;
     /**
@@ -45,9 +45,9 @@ public class RateLimiterShmValue extends AbstractShmValue {
     }
 
     /**
-     * Get the remaining records before capacity is exceeded
+     * Get the number of available tokens before capacity is exceeded
      *
-     * @return the remaining records
+     * @return the number of available tokens
      */
     public int getRemaining() {
         return Math.max(this.capacity - this.tokens.size(), 0);

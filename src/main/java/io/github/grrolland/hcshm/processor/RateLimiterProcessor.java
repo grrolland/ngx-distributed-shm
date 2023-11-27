@@ -27,7 +27,7 @@ public class RateLimiterProcessor implements EntryProcessor<String, RateLimiterS
      * Constructor
      *
      * @param capacity
-     *         the maximum count of records.
+     *         the maximum capacity of the rate limiter
      * @param duration
      *         the sliding window duration
      */

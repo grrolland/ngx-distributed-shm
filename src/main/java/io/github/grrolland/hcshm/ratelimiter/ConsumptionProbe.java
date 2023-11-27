@@ -14,9 +14,9 @@ public class ConsumptionProbe {
     private final int remainingTokens;
 
     /**
-     * Return the remaining records
+     * Return the number of remaining available tokens or -1 if capacity was exceeded
      *
-     * @return number of records available
+     * @return the number of remaining available tokens or -1
      */
     public int getRemainingTokens() {
         return this.remainingTokens;
