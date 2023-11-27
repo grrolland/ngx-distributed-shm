@@ -7,22 +7,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * RateLimiterValue
+ * RateLimiterShmValue store rate limiter data
  */
-public class RateLimiterValue extends AbstractShmValue {
+public class RateLimiterShmValue extends AbstractShmValue {
 
     /**
      * The current consumption records
      */
-    private final List<Record> records;
+    private final List<Token> tokens;
     /**
      * Sliding Window duration
      */
-    private final Duration duration;
+    private Duration duration;
     /**
      * The capacity
      */
-    private final int capacity;
+    private int capacity;
+
+    /**
+     * Set capacity
+     *
+     * @param pCapacity
+     *         capacity
+     */
+    public void setCapacity(final int pCapacity) {
+        this.capacity = pCapacity;
+    }
+
+    /**
+     * Set duration
+     *
+     * @param pDuration
+     *         duration
+     */
+    public void setDuration(final Duration pDuration) {
+        this.duration = pDuration;
+    }
 
     /**
      * Get the remaining records before capacity is exceeded
@@ -30,7 +50,7 @@ public class RateLimiterValue extends AbstractShmValue {
      * @return the remaining records
      */
     public int getRemaining() {
-        return this.capacity - this.records.size();
+        return Math.max(this.capacity - this.tokens.size(), 0);
     }
 
     @Override
@@ -47,28 +67,28 @@ public class RateLimiterValue extends AbstractShmValue {
      * @param duration
      *         the sliding window duration
      */
-    public RateLimiterValue(int capacity, Duration duration) {
-        this.records = new ArrayList<>(capacity);
+    public RateLimiterShmValue(int capacity, Duration duration) {
+        this.tokens = new ArrayList<>(capacity);
         this.duration = duration;
         this.capacity = capacity;
     }
 
     /**
-     * Consume and return the ConsumptionProbe
+     * Try to take a token and return the ConsumptionProbe
      *
-     * @return ConsumptionProbe
+     * @return the ConsumptionProbe
      */
-    public ConsumptionProbe use() {
+    public ConsumptionProbe take() {
         // Clear expired tokens
         this.clearExpired();
 
-        boolean consumed = false;
         int remaining = -1;
-        if (canConsume()) {
-            consumed = records.add(new Record());
+        // Try to consume
+        if (this.canConsume()) {
+            tokens.add(new Token());
             remaining = this.getRemaining();
         }
-        return new ConsumptionProbe(consumed, remaining);
+        return new ConsumptionProbe(remaining);
     }
 
     /**
@@ -77,13 +97,14 @@ public class RateLimiterValue extends AbstractShmValue {
      * @return true if at least one token is available
      */
     private boolean canConsume() {
-        return this.records.size() < this.capacity;
+        return this.tokens.size() < this.capacity;
     }
 
     /**
      * Clear expired tokens
      */
     private void clearExpired() {
-        records.removeIf(pRecord -> pRecord.isExpired(this.duration));
+
+        tokens.removeIf(pToken -> pToken.isExpired(this.duration));
     }
 }

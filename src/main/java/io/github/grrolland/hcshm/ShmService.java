@@ -23,7 +23,7 @@ import io.github.grrolland.hcshm.processor.IncrProcessor;
 import io.github.grrolland.hcshm.processor.RateLimiterProcessor;
 import io.github.grrolland.hcshm.processor.TouchProcessor;
 import io.github.grrolland.hcshm.ratelimiter.ConsumptionProbe;
-import io.github.grrolland.hcshm.ratelimiter.RateLimiterValue;
+import io.github.grrolland.hcshm.ratelimiter.RateLimiterShmValue;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -158,11 +158,11 @@ public class ShmService {
      * Consume a token
      * @param key  the key
      * @param capacity  the maximum capacity
-     * @param duration the duration of a token
+     * @param duration the duration of a token in seconds
      * @return the number of tokens remaining
      */
     public String rateLimiter(String key, int capacity, long duration) {
-        final IMap<String, RateLimiterValue> map = regionLocator.getMap(hazelcast, key);
+        final IMap<String, RateLimiterShmValue> map = regionLocator.getMap(hazelcast, key);
         RateLimiterProcessor rateLimiterProcessor = new RateLimiterProcessor(capacity, Duration.ofMillis(duration));
         ConsumptionProbe consumptionProbe = (ConsumptionProbe) map.executeOnKey(key, rateLimiterProcessor);
         return String.valueOf(consumptionProbe.getRemainingTokens());

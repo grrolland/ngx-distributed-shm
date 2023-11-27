@@ -49,8 +49,8 @@ public class RateLimiterCommand extends Command {
             assertTokens(commandTokens, 4);
             String key = getKey(commandTokens[1]);
             int capacity = getIncrValue(commandTokens[2]);
-            long expire = getExpire(commandTokens[3]);
-            String value = getService().rateLimiter(key, capacity, expire);
+            long duration = getExpire(commandTokens[3]);
+            String value = getService().rateLimiter(key, capacity, duration);
             writeLen(response, value);
             writeValue(response, value);
             writeDone(response);

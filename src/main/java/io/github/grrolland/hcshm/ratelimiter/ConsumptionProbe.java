@@ -1,27 +1,17 @@
 package io.github.grrolland.hcshm.ratelimiter;
 
 /**
- * Describes token consumed, and tokens remaining
+ * Describes token consumed, and number of tokens remaining
+ * <p>
+ * remainingTokens -1 means no tokens have been consumed
+ * remainingTokens 0 means there is no more tokens to consume
  */
 public class ConsumptionProbe {
-    /**
-     * Token has been consumed
-     */
-    private final boolean consumed;
 
     /**
      * Number of remaining tokens
      */
     private final int remainingTokens;
-
-    /**
-     * return the flag consumed
-     *
-     * @return true if token was consumed
-     */
-    public boolean isConsumed() {
-        return this.consumed;
-    }
 
     /**
      * Return the remaining records
@@ -36,13 +26,10 @@ public class ConsumptionProbe {
     /**
      * Constructor
      *
-     * @param consumed
-     *         true if token has been consumer
      * @param remainingTokens
      *         the number of remaining token
      */
-    ConsumptionProbe(boolean consumed, int remainingTokens) {
-        this.consumed = consumed;
+    ConsumptionProbe(int remainingTokens) {
         this.remainingTokens = remainingTokens;
     }
 }

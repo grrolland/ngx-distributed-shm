@@ -28,7 +28,7 @@ local function escape(key)
     return table.concat(result, ":")
 end
 
-function _M.new(self, opts)
+function _M.new(_, opts)
     local sock, err = tcp()
     if not sock then
         return nil, err
@@ -88,7 +88,8 @@ local function read_response_line(self, data)
         ngx.log(ngx.DEBUG, "PROTOCOL ERROR")
         return nil, _M.PROTOCOL_ERROR
     else
-        local data, err = sock:receive(data)
+        local err
+        data, err = sock:receive(data)
         if not data then
             if err == "timeout" then
                 sock:close()
@@ -97,7 +98,8 @@ local function read_response_line(self, data)
         end
         ngx.log(ngx.DEBUG, "RECEIVE : ", data)
         -- Discard trailing \r\n
-        local trail, err = sock:receive()
+        local trail
+        trail, err = sock:receive()
         if not trail then
             if err == "timeout" then
                 sock:close()
@@ -128,7 +130,7 @@ function _M.get(self, key)
     if resp == "LEN" then
         resp, data = read_response_line(self, data)
         if resp == "DATA" then
-            local resp, _ = read_response_line(self)
+            resp = read_response_line(self)
             if resp == "DONE" then
                 return data, nil
             else
@@ -203,7 +205,7 @@ function _M.incr(self, key, value, init, init_ttl)
     if resp == "LEN" then
         resp, data = read_response_line(self, data)
         if resp == "DATA" then
-            local resp, _ = read_response_line(self)
+            resp = read_response_line(self)
             if resp == "DONE" then
                 return data, nil
             else
@@ -247,7 +249,7 @@ function _M.set(self, key, value, exptime)
     if resp == "LEN" then
         resp, data = read_response_line(self, data)
         if resp == "DATA" then
-            local resp, _ = read_response_line(self)
+            resp = read_response_line(self)
             if resp == "DONE" then
                 return data, nil
             else
@@ -289,6 +291,58 @@ function _M.touch(self, key, exptime)
     local resp, data = read_response_line(self)
     if resp == "DONE" then
         return 1, nil
+    elseif resp == "ERROR" then
+        return nil, data
+    else
+        return nil, _M.PROTOCOL_ERROR
+    end
+
+end
+
+---
+--- Allow to manage rate limit on sliding window. Rate limiter will try to 'consume' a token and return the remaining token available.
+--- If the quota is exceeded, this method will return nil, "rejected"
+--- Otherwhise return the remaining token available in the window
+---
+---@param self self the dshm instance
+---@param self string the key
+---@param capacity number the tokens capacity
+---@param duration number the sliding window in seconds
+---@return number the remaining tokens available or nil if quota is exceeded
+---@return string nil or error. Error code is rejected when quota is exceeded
+---
+function _M.rate_limiter(self, key, capacity, duration)
+
+    ngx.log(ngx.DEBUG, "rate_limiter : ", key, ", capacity : ", capacity, ", duration : ", duration)
+
+    local sock = self.sock
+    if not sock then
+        return nil, "not initialized"
+    end
+
+    local command = "rate_limiter " .. self.escape_key(key) .. " " .. capacity .. " " .. duration .. "\r\n"
+    local bytes, err = sock:send(command)
+    if not bytes then
+        return nil, err
+    end
+
+    local resp, data = read_response_line(self)
+    if resp == "LEN" then
+        resp, data = read_response_line(self, data)
+        if resp == "DATA" then
+            resp, _ = read_response_line(self)
+            if resp == "DONE" then
+                if data == "-1" then
+                    return nil, "rejected"
+                else
+                    return data, nil
+                end
+            else
+                return nil, _M.PROTOCOL_ERROR
+            end
+        else
+            return nil, _M.PROTOCOL_ERROR
+        end
     elseif resp == "ERROR" then
         return nil, data
     else

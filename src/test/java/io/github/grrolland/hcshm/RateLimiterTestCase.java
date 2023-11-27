@@ -20,7 +20,7 @@ public class RateLimiterTestCase extends AbstractHCSHMGetTestCase {
         getWriter().flush();
         assertResponseGetValue("8");
 
-        pause(1000);
+        pause(2000);
 
         getWriter().write("RATE_LIMITER ratekey 10 1\r\n");
         getWriter().flush();
@@ -29,17 +29,22 @@ public class RateLimiterTestCase extends AbstractHCSHMGetTestCase {
     }
 
     @Test
-    public void testConsumeAll() throws IOException {
+    public void testConsumeAll() throws IOException, InterruptedException {
 
         for (int i = 0; i < 10; i++) {
-            getWriter().write("RATE_LIMITER ratekey 10 500\r\n");
+            getWriter().write("RATE_LIMITER ratekey 10 2\r\n");
             getWriter().flush();
             assertResponseGetValue(String.valueOf(10 - 1 - i));
         }
 
-        getWriter().write("RATE_LIMITER ratekey 10 500\r\n");
+        getWriter().write("RATE_LIMITER ratekey 10 1\r\n");
         getWriter().flush();
         assertResponseGetValue("-1");
+        pause(3000);
+
+        getWriter().write("RATE_LIMITER ratekey 10 2\r\n");
+        getWriter().flush();
+        assertResponseGetValue("9");
 
     }
 }
