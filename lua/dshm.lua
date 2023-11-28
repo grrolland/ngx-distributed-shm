@@ -8,6 +8,7 @@ local tonumber = tonumber
 local math = math
 local tostring = tostring
 local table = table
+local type = type
 local ngx = ngx
 
 local _M = {
@@ -17,6 +18,11 @@ local _M = {
 
 local mt = { __index = _M }
 
+---
+---Escape the key
+---@param key string the key
+---@return string the escaped key
+---
 local function escape(key)
     local i = 1
     local result = {}
@@ -28,6 +34,12 @@ local function escape(key)
     return table.concat(result, ":")
 end
 
+---
+---Constructor
+---@param _ self instance
+---@param opts table options (optional) in order to override espace_key/unescape_key functions
+---@return self instance
+---
 function _M.new(_, opts)
     local sock, err = tcp()
     if not sock then
@@ -55,7 +67,11 @@ function _M.new(_, opts)
         unescape_key = unescape_key,
     }, mt)
 end
-
+---
+---Read response line
+---@param self self the dshm instance
+---@param data string
+---
 local function read_response_line(self, data)
     local sock = self.sock
     if not sock then
@@ -112,19 +128,59 @@ local function read_response_line(self, data)
     end
 end
 
-function _M.get(self, key)
-
-    ngx.log(ngx.DEBUG, "Get : ", key)
-
+---
+---Send command
+---@param self self instance
+---@param command string the command to send
+---@param key string the key
+---@param params table the command arguments (optional)
+---@param data string the data to send (optional)
+---@return number number of bytes sent
+---@return any error
+---
+local function send_command(self, command, key, params, data)
     local sock = self.sock
     if not sock then
         return nil, "not initialized"
     end
+    -- Add args
+    local str_arg = ""
+    if params then
+        if type(params) == "table" then
+            str_arg = table.concat(params, " ")
+        else
+            str_arg = params
+        end
+        str_arg = " " .. str_arg
+    end
+    -- Add new line separator
+    str_arg = str_arg .. "\r\n"
 
-    local bytes, err = sock:send("get " .. self.escape_key(key) .. "\r\n")
+    -- Add data
+    if data then
+        str_arg = str_arg .. data
+    end
+
+    -- Prepare the full command
+    local str_command = command
+    if key then
+        str_command = str_command .. " " .. self.escape_key(key) .. str_arg
+    end
+    ngx.log(ngx.DEBUG, "send command to dshm:", str_command)
+    local bytes, err = sock:send(str_command)
     if not bytes then
         return nil, err
     end
+    return bytes, nil
+end
+
+---
+---Read and parse response that return DATA
+---@param self self the dshm instance
+---@return string data
+---@return string error
+---
+local function read_response_data(self)
 
     local resp, data = read_response_line(self)
     if resp == "LEN" then
@@ -140,28 +196,46 @@ function _M.get(self, key)
             return nil, _M.PROTOCOL_ERROR
         end
     elseif resp == "ERROR" then
-        if data == "not_found" then
-            return nil, "not found"
-        else
-            return nil, data
-        end
+        return nil, data
     else
         return nil, _M.PROTOCOL_ERROR
     end
+end
+---
+---Execute command get and return the data
+---@param self self the dshm instance
+---@param key string the key
+---@return string data
+---
+function _M.get(self, key)
 
+    ngx.log(ngx.DEBUG, "Get : ", key)
+
+    local _, err = send_command(self, "get", key)
+
+    if err then
+        return nil, err
+    end
+
+    local resp
+    resp, err = read_response_data(self)
+    if err and err == "not_found" then
+        err = "not found"
+    end
+    return resp, err
 end
 
+---Delete the key
+---@param self self the dshm instance
+---@param key string the key to delete
+---@return number 1 if key has been deleted or nil
+---@return string error
 function _M.delete(self, key)
 
     ngx.log(ngx.DEBUG, "Delete : ", key)
 
-    local sock = self.sock
-    if not sock then
-        return nil, "not initialized"
-    end
-
-    local bytes, err = sock:send("delete " .. self.escape_key(key) .. "\r\n")
-    if not bytes then
+    local _, err = send_command(self, "delete", key)
+    if err then
         return nil, err
     end
 
@@ -175,116 +249,75 @@ function _M.delete(self, key)
     end
 
 end
-
+---Increment the counter
+---@param self self the dshm instance
+---@param key string the key
+---@param value string the incr value (example : 1, -1, 2)
+---@param init string the initial value (optional). If counter doesn't exist, counter is initialized with this value
+---@param init_ttl number the initial TTL value (optional). If counter doesn't exist, counter ttl is initialized with this value
+---@return string data the counter value after command execution
+---@return string error
 function _M.incr(self, key, value, init, init_ttl)
 
     ngx.log(ngx.DEBUG, "Incr : ", key, ", Value : ", value, ", Init : ", init, ", Init_TTL", init_ttl)
 
-    local sock = self.sock
-    if not sock then
-        return nil, "not initialized"
-    end
+    local l_init = init or 0
+    local l_init_ttl = init_ttl or 0
 
-    local l_init = 0
-    if init then
-        l_init = init
-    end
-
-    local s_init_ttl = ""
-    if init_ttl then
-        s_init_ttl = " " .. init_ttl
-    end
-
-    local command = "incr " .. self.escape_key(key) .. " " .. value .. " " .. l_init .. s_init_ttl .. "\r\n"
-    local bytes, err = sock:send(command)
-    if not bytes then
+    local params = { value, l_init, l_init_ttl }
+    local _, err = send_command(self, "incr", key, params)
+    if err then
         return nil, err
     end
-
-    local resp, data = read_response_line(self)
-    if resp == "LEN" then
-        resp, data = read_response_line(self, data)
-        if resp == "DATA" then
-            resp = read_response_line(self)
-            if resp == "DONE" then
-                return data, nil
-            else
-                return nil, _M.PROTOCOL_ERROR
-            end
-        else
-            return nil, _M.PROTOCOL_ERROR
-        end
-    elseif resp == "ERROR" then
-        return nil, data
-    else
-        return nil, _M.PROTOCOL_ERROR
-    end
+    return read_response_data(self)
 
 end
 
+---Set a key
+---@param self self the dshm instance
+---@param key string the key
+---@param value string the value
+---@param exptime number the TTL value (optional).
+---@return string data the value
+---@return string error
 function _M.set(self, key, value, exptime)
 
-    if not exptime or exptime == 0 then
-        exptime = 0
-    else
+    if exptime and exptime ~= 0 then
         exptime = math.floor(exptime + 0.5)
     end
 
-    ngx.log(ngx.DEBUG, "Key : ", key, ", Value : ", value, ", Exp : ", exptime)
+    ngx.log(ngx.DEBUG, "set Key : ", key, ", Value : ", value, ", Exp : ", exptime)
 
     local sock = self.sock
     if not sock then
         return nil, "not initialized"
     end
+    local params = { exptime, strlen(value) }
+    local _, err = send_command(self, "set", key, params, value)
 
-    local req = "set " .. self.escape_key(key) .. " "
-            .. exptime .. " " .. strlen(value) .. "\r\n" .. value
-
-    local bytes, err = sock:send(req)
-    if not bytes then
+    if err then
         return nil, err
     end
 
-    local resp, data = read_response_line(self)
-    if resp == "LEN" then
-        resp, data = read_response_line(self, data)
-        if resp == "DATA" then
-            resp = read_response_line(self)
-            if resp == "DONE" then
-                return data, nil
-            else
-                return nil, _M.PROTOCOL_ERROR
-            end
-        else
-            return nil, _M.PROTOCOL_ERROR
-        end
-    elseif resp == "ERROR" then
-        return nil, data
-    else
-        return nil, _M.PROTOCOL_ERROR
-    end
+    return read_response_data(self)
 
 end
-
+---Touch a key
+---@param self self the dshm instance
+---@param key string the key
+---@param exptime number the new TTL value (optional).
+---@return string data the value
+---@return string error
 function _M.touch(self, key, exptime)
 
-    if not exptime or exptime == 0 then
-        exptime = 0
-    else
+    if exptime and exptime ~= 0 then
         exptime = math.floor(exptime + 0.5)
     end
 
     ngx.log(ngx.DEBUG, "Touch : ", key, ", Exp : ", exptime)
 
-    local sock = self.sock
-    if not sock then
-        ngx.log(ngx.DEBUG, "Socket not initialized")
-        return nil, "not initialized"
-    end
-
-    local bytes, err = sock:send("touch " .. self.escape_key(key) .. " "
-            .. exptime .. "\r\n")
-    if not bytes then
+    local _, err = send_command(self, "touch", key, exptime)
+    if err then
         return nil, err
     end
 
@@ -300,14 +333,15 @@ function _M.touch(self, key, exptime)
 end
 
 ---
---- Allow to manage rate limit on sliding window. Rate limiter will try to 'consume' a token and return the remaining token available.
---- If the quota is exceeded, this method will return nil, "rejected"
---- Otherwhise return the remaining token available in the window
+--- Sliding window rate limiter command.
+---Rate limiter will try to 'consume' a token and return the remaining tokens available.
+---If no tokens were available, this method will return nil, "rejected"
+---Otherwise return the next remaining tokens available in the window
 ---
 ---@param self self the dshm instance
 ---@param self string the key
 ---@param capacity number the tokens capacity
----@param duration number the sliding window in seconds
+---@param duration number the sliding window duration in seconds
 ---@return number the remaining tokens available or nil if quota is exceeded
 ---@return string nil or error. Error code is rejected when quota is exceeded
 ---
@@ -320,48 +354,30 @@ function _M.rate_limiter(self, key, capacity, duration)
         return nil, "not initialized"
     end
 
-    local command = "rate_limiter " .. self.escape_key(key) .. " " .. capacity .. " " .. duration .. "\r\n"
-    local bytes, err = sock:send(command)
-    if not bytes then
+    local params = { capacity, duration }
+    local _, err = send_command(self, "rate_limiter", key, params)
+    if err then
         return nil, err
     end
 
-    local resp, data = read_response_line(self)
-    if resp == "LEN" then
-        resp, data = read_response_line(self, data)
-        if resp == "DATA" then
-            resp, _ = read_response_line(self)
-            if resp == "DONE" then
-                if data == "-1" then
-                    return nil, "rejected"
-                else
-                    return data, nil
-                end
-            else
-                return nil, _M.PROTOCOL_ERROR
-            end
-        else
-            return nil, _M.PROTOCOL_ERROR
-        end
-    elseif resp == "ERROR" then
-        return nil, data
-    else
-        return nil, _M.PROTOCOL_ERROR
+    local resp
+    resp, err = read_response_data(self)
+    if resp == "-1" then
+        resp = nil
+        err = "rejected"
     end
-
+    return resp, err
 end
-
+---
+---
+---Quit command
+---@return number 1 when successful
+---@return string error
 function _M.quit(self)
-    local sock = self.sock
-    if not sock then
-        return nil, "not initialized"
-    end
-
-    local bytes, err = sock:send("quit\r\n")
-    if not bytes then
+    local _, err = send_command(self, "quit")
+    if err then
         return nil, err
     end
-
     return 1
 end
 
