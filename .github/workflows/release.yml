@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Get tag name
         id: get_tag_name
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/heads\/release-/}
+        run: echo name=VERSION::${GITHUB_REF/refs\/heads\/release-/} >> $GITHUB_OUTPUT
 
         ##
         # Perform Maven Release
