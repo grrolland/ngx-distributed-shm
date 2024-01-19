@@ -62,17 +62,25 @@ public class TouchTestCase extends AbstractHCSHMGetTestCase {
     public void testUnexpire() {
 
         try {
-            getWriter().write("SET key 1 10\r\n");
+            // Ensure key is not found (debug test)
+            getWriter().write("GET key\r\n");
+            getWriter().flush();
+            assertResponseNotFound();
+            // Set key that expire in 3 s
+            getWriter().write("SET key 3 10\r\n");
             getWriter().write("1234567890");
             getWriter().flush();
             assertResponseGetValue("1234567890");
 
+            // Clear key expiration
             getWriter().write("TOUCH key 0\r\n");
             getWriter().flush();
             assertResponseDone();
 
-            pause();
+            // Wait more than 3 seconds
+            pause(4000);
 
+            // Key should be there
             getWriter().write("GET key\r\n");
             getWriter().flush();
             assertResponseGetValue("1234567890");
