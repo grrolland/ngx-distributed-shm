@@ -24,7 +24,7 @@ jobs:
         ##
         # Perform Maven Release
         #
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: master
       - name: Set up JDK 11
@@ -45,7 +45,7 @@ jobs:
       ##
       #  Checkout and Build the Tag
       #
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: ${{ steps.get_tag_name.outputs.VERSION }}
 
@@ -72,7 +72,7 @@ jobs:
       #  Publish to Github Docker Registry
       #
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -80,7 +80,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -88,7 +88,7 @@ jobs:
             latest
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
@@ -99,7 +99,7 @@ jobs:
       #  Publish to Alternate Docker Registry
       #
       - name: Log in to the Container registry
-        uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.ALTERNATE_REGISTRY }}
           username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
@@ -107,7 +107,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta_alt
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.ALTERNATE_REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -115,7 +115,7 @@ jobs:
             latest
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
