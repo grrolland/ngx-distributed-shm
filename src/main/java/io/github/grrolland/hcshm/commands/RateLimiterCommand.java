@@ -22,9 +22,9 @@ import io.github.grrolland.hcshm.ShmService;
 import io.github.grrolland.hcshm.processor.BadRequestException;
 
 /**
- * The Touch Command
+ * The Rate limiter Command
  */
-public class TouchCommand extends Command {
+public class RateLimiterCommand extends Command {
 
     /**
      * Default Constructor
@@ -32,7 +32,7 @@ public class TouchCommand extends Command {
      * @param service
      *         the shm service
      */
-    TouchCommand(ShmService service) {
+    RateLimiterCommand(ShmService service) {
         super(service);
     }
 
@@ -46,10 +46,13 @@ public class TouchCommand extends Command {
     public String execute(String[] commandTokens) {
         final StringBuilder response = new StringBuilder();
         try {
-            assertTokens(commandTokens, 3);
+            assertTokens(commandTokens, 4);
             String key = getKey(commandTokens[1]);
-            long expire = getExpire(commandTokens[2]);
-            getService().touch(key, expire);
+            int capacity = getIncrValue(commandTokens[2]);
+            long duration = getExpire(commandTokens[3]);
+            String value = getService().rateLimiter(key, capacity, duration);
+            writeLen(response, value);
+            writeValue(response, value);
             writeDone(response);
         } catch (ProtocolException e) {
             writeMalformedRequest(response);
@@ -58,5 +61,4 @@ public class TouchCommand extends Command {
         }
         return response.toString();
     }
-
 }

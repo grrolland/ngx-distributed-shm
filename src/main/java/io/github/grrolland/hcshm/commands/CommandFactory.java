@@ -70,6 +70,9 @@ public class CommandFactory {
             case FLUSHALL:
                 command = new FlushAllCommand(service);
                 break;
+            case RATE_LIMITER:
+                command = new RateLimiterCommand(service);
+                break;
             default:
                 command = new UnknownCommand(service);
                 break;

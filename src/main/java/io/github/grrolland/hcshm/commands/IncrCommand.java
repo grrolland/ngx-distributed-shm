@@ -19,6 +19,7 @@ package io.github.grrolland.hcshm.commands;
 
 import io.github.grrolland.hcshm.ProtocolException;
 import io.github.grrolland.hcshm.ShmService;
+import io.github.grrolland.hcshm.processor.BadRequestException;
 
 /**
  * The INCR Command
@@ -50,12 +51,15 @@ public class IncrCommand extends Command {
             int incr = getIncrValue(commandTokens[2]);
             int initial = getIncrValue(commandTokens[3]);
             long initialExpire = commandTokens.length == 5 ? getExpire(commandTokens[4]) : 0;
+
             String value = getService().incr(key, incr, initial, initialExpire);
             writeLen(response, value);
             writeValue(response, value);
             writeDone(response);
         } catch (ProtocolException e) {
             writeMalformedRequest(response);
+        } catch (BadRequestException e) {
+            writeBadRequest(response);
         }
         return response.toString();
     }

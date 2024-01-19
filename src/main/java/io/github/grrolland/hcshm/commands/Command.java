@@ -42,10 +42,14 @@ public abstract class Command {
     protected static final String RESPONSE_LINE_DELIMITER = "\r\n";
 
     /**
-     * Protocol response : Error malformed resuqest
+     * Protocol response : Error malformed request
      */
     protected static final String ERROR_MALFORMED_REQUEST = "ERROR malformed_request";
 
+    /**
+     * Protocol response : Error malformed bad request
+     */
+    protected static final String ERROR_BAD_REQUEST = "ERROR bad_request";
     /**
      * Protocol response : Error malformed request
      */
@@ -277,6 +281,17 @@ public abstract class Command {
      */
     protected void writeMalformedRequest(StringBuilder response) {
         response.append(ERROR_MALFORMED_REQUEST);
+        response.append(RESPONSE_LINE_DELIMITER);
+    }
+
+    /**
+     * Write the LEN protocol line
+     *
+     * @param response
+     *         the constructing response
+     */
+    protected void writeBadRequest(StringBuilder response) {
+        response.append(ERROR_BAD_REQUEST);
         response.append(RESPONSE_LINE_DELIMITER);
     }
 

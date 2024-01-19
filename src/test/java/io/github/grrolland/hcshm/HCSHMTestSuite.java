@@ -19,6 +19,7 @@ package io.github.grrolland.hcshm;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import io.github.grrolland.hcshm.ratelimiter.RateLimiterShmValueTestCase;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -29,7 +30,9 @@ import org.slf4j.LoggerFactory;
  * Test Suite initializing the distributed SHM
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ShmValueTestCase.class,
+@Suite.SuiteClasses({TouchTestCase.class,
+        RateLimiterShmValueTestCase.class,
+        ShmValueTestCase.class,
         DeleteTestCase.class,
         GetTestCase.class,
         IncrTestCase.class,
@@ -37,6 +40,7 @@ import org.slf4j.LoggerFactory;
         SetTestCase.class,
         TouchTestCase.class,
         UnknownCommandTestCase.class,
+        RateLimiterTestCase.class,
         FlushAllTestCase.class})
 public class HCSHMTestSuite {
 

@@ -15,46 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.grrolland.hcshm.commands;
+package io.github.grrolland.hcshm;
 
-/**
- * The known Command Verbs
+import java.io.Serializable;
+
+/***
+ * Base class for value stored in Hazelcast
  */
-public enum CommandVerb {
+public abstract class AbstractShmValue implements Serializable {
+
     /**
-     * The GET command
+     * Get string value
+     *
+     * @return the value as string
      */
-    GET,
-    /**
-     * The SET command
-     */
-    SET,
-    /**
-     * The TOUCH command
-     */
-    TOUCH,
-    /**
-     * The INCR command
-     */
-    INCR,
-    /**
-     * The RATE_LIMITER command
-     */
-    RATE_LIMITER,
-    /**
-     * The Quit Command
-     */
-    QUIT,
-    /**
-     * The Delete Command
-     */
-    DELETE,
-    /**
-     * The flush All Command
-     */
-    FLUSHALL,
-    /**
-     * Unknown Command
-     */
-    UNKNOWN
+    public abstract String getValue();
 }

@@ -43,6 +43,14 @@ public class TouchProcessor implements EntryProcessor<String, ShmValue, Object> 
         this.expire = expire;
     }
 
+    private static ShmValue getCurrentValue(final Map.Entry<String, ShmValue> entry) throws BadRequestException {
+        try {
+            return entry.getValue();
+        } catch (ClassCastException e) {
+            throw new BadRequestException(e);
+        }
+    }
+
     /**
      * Touch process
      *
@@ -52,7 +60,7 @@ public class TouchProcessor implements EntryProcessor<String, ShmValue, Object> 
      */
     @Override
     public Object process(Map.Entry<String, ShmValue> entry) {
-        final ShmValue r = entry.getValue();
+        final ShmValue r = getCurrentValue(entry);
         if (null != r) {
             r.expire(expire);
             ((ExtendedMapEntry<String, ShmValue>) entry).setValue(r, expire, TimeUnit.MILLISECONDS);

@@ -60,6 +60,14 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
         this.initialExpire = initialExpire;
     }
 
+    private static ShmValue getCurrentValue(final Map.Entry<String, ShmValue> entry) throws BadRequestException {
+        try {
+            return entry.getValue();
+        } catch (ClassCastException e) {
+            throw new BadRequestException(e);
+        }
+    }
+
     /**
      * Process  the incrementation command
      *
@@ -70,7 +78,7 @@ public class IncrProcessor implements EntryProcessor<String, ShmValue, Object>, 
     @Override
     public Object process(Map.Entry<String, ShmValue> entry) {
 
-        final ShmValue r = entry.getValue();
+        final ShmValue r = getCurrentValue(entry);
         String newval;
         long expire;
         ExtendedMapEntry<String, ShmValue> extendedMapEntry = (ExtendedMapEntry<String, ShmValue>) entry;

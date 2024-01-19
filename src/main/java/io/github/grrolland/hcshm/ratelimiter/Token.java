@@ -15,46 +15,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package io.github.grrolland.hcshm.commands;
+package io.github.grrolland.hcshm.ratelimiter;
+
+import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 
 /**
- * The known Command Verbs
+ * A token consumed at a specific date
  */
-public enum CommandVerb {
+public class Token implements Serializable {
+
     /**
-     * The GET command
+     * Expiration
      */
-    GET,
+    private final long createdAt;
+
     /**
-     * The SET command
+     * Constructor
      */
-    SET,
+    public Token() {
+        this.createdAt = System.currentTimeMillis();
+    }
+
     /**
-     * The TOUCH command
+     * @param duration
+     *         Duration
+     * @return true if expired
      */
-    TOUCH,
-    /**
-     * The INCR command
-     */
-    INCR,
-    /**
-     * The RATE_LIMITER command
-     */
-    RATE_LIMITER,
-    /**
-     * The Quit Command
-     */
-    QUIT,
-    /**
-     * The Delete Command
-     */
-    DELETE,
-    /**
-     * The flush All Command
-     */
-    FLUSHALL,
-    /**
-     * Unknown Command
-     */
-    UNKNOWN
+    boolean isExpired(Duration duration) {
+        // check if expiration date is before now
+        return Instant.ofEpochMilli(this.createdAt).plus(duration).isBefore(Instant.now());
+    }
 }
