@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Get tag name
         id: get_tag_name
-        run: echo name=VERSION::${GITHUB_REF/refs\/heads\/release-/} >> $GITHUB_OUTPUT
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/heads\/release-/}
 
         ##
         # Perform Maven Release
@@ -58,7 +58,7 @@ jobs:
             sonar:sonar \
             -B -e -V \
           	-Dsonar.host.url=$SONAR_URL \
-          	-Dsonar.login=$SONAR_TOKEN \
+          	-Dsonar.token=$SONAR_TOKEN \
             -Dsonar.organization=$SONAR_ORG \
             -Dsonar.projectKey=$SONAR_PROJECT_KEY \
             -Dsonar.sources=src/main \
